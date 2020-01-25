@@ -21,6 +21,12 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- mtl
+- text
+- transformers
+- morpheus-graphql
+- envy
+- load-env
 
 library:
   source-dirs: src
