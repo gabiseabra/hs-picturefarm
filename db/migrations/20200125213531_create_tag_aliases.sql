@@ -1,6 +1,6 @@
 -- migrate:up
 
-create table tag_aliaes (
+create table tag_aliases (
   tag varchar not null,
   alias varchar not null,
   PRIMARY KEY (tag, alias)
@@ -8,4 +8,4 @@ create table tag_aliaes (
 
 -- migrate:down
 
-drop table tag_aliaes;
+drop table tag_aliases;

@@ -75,10 +75,10 @@ CREATE TABLE public.schema_migrations (
 
 
 --
--- Name: tag_aliaes; Type: TABLE; Schema: public; Owner: -
+-- Name: tag_aliases; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.tag_aliaes (
+CREATE TABLE public.tag_aliases (
     tag character varying NOT NULL,
     alias character varying NOT NULL
 );
@@ -109,11 +109,11 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
--- Name: tag_aliaes tag_aliaes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: tag_aliases tag_aliases_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.tag_aliaes
-    ADD CONSTRAINT tag_aliaes_pkey PRIMARY KEY (tag, alias);
+ALTER TABLE ONLY public.tag_aliases
+    ADD CONSTRAINT tag_aliases_pkey PRIMARY KEY (tag, alias);
 
 
 --
