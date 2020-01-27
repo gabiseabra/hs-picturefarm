@@ -6,14 +6,15 @@ module Model.Picture (
 
 import Control.Monad
 import Control.Applicative
+
 import Data.Aeson
 import Data.Maybe
 import Data.Text (Text)
 import Data.UUID
+import Data.String.QM
 
 import qualified Database.PostgreSQL.Simple              as TQ
 import qualified Database.PostgreSQL.Simple.TypedQuery   as TQ
-import Data.String.QM
 
 import Model (parseOne, parseMany)
 

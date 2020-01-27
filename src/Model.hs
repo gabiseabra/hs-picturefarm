@@ -4,6 +4,7 @@ module Model (
 ) where
 
 import Control.Monad
+
 import Data.Aeson
 import Data.Aeson.Types (parseJSON, parseJSONList, parseEither, listValue)
 import Data.Typeable (Typeable)

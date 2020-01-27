@@ -2,6 +2,7 @@ module Application (app) where
 
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Except
+
 import Data.Pool
 import Database.PostgreSQL.Simple
 

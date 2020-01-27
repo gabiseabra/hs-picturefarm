@@ -1,12 +1,19 @@
-module Config where
+module Config (
+  Init,
+  Config,
+  initialize
+) where
+
+import GHC.Generics
 
 import Control.Monad.Except (ExceptT (..), throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Trans (liftIO)
+
 import Data.Pool
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.URL
-import GHC.Generics
+
 import LoadEnv
 import System.Envy
 
