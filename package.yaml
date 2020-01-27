@@ -22,12 +22,17 @@ description:         Please see the README on GitHub at <https://github.com/gith
 default-extensions:
 - DeriveGeneric
 - TemplateHaskell
+- QuasiQuotes
+- OverloadedStrings
 
 dependencies:
 - base >= 4.7 && < 5
 - mtl
 - text
 - tuple
+- aeson
+- uuid
+- rawstring-qm
 - resource-pool
 - transformers
 - envy
