@@ -1,3 +1,3 @@
 # [WIP] hs-picturefarm
 
-README c eventually
+README coming eventually
