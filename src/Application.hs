@@ -9,4 +9,3 @@ app = do
     case init of
         Left err -> putStrLn err
         Right config -> print config
-

@@ -1,13 +1,14 @@
-{-# LANGUAGE DeriveGeneric #-}
-
 module Config where
 
-import Control.Monad.Except
-import Control.Monad
-import System.Environment
+import Control.Monad.Except (ExceptT (..), throwError)
+import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.Trans (liftIO)
+import Data.Pool
+import Database.PostgreSQL.Simple
+import Database.PostgreSQL.Simple.URL
+import GHC.Generics
 import LoadEnv
 import System.Envy
-import GHC.Generics
 
 data Config = Config {
   databaseUrl :: [Char]
@@ -20,7 +21,15 @@ type Init a = ExceptT String IO a
 loadConfig :: Init Config
 loadConfig = ExceptT $ liftIO $ loadEnv >> decodeEnv
 
-initialize :: Init Config
+createConnectionsPool :: Config -> Init (Pool Connection)
+createConnectionsPool config =
+  case parseDatabaseUrl . databaseUrl $ config of
+    Just connectionInfo ->
+      liftIO $ createPool (connect connectionInfo) close 2 5 10
+    _ -> throwError "Invalid database url"
+
+initialize :: Init (Config, Pool Connection)
 initialize = do
   config <- loadConfig
-  return config
+  conn <- createConnectionsPool config
+  return (config, conn)

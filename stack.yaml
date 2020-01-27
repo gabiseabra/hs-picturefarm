@@ -41,6 +41,8 @@ packages:
 #
 extra-deps:
 - morpheus-graphql-0.10.0
+- postgresql-simple-typed-0.1.1.1
+- typedquery-0.1.1.2
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
