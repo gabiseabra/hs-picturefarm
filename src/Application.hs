@@ -17,5 +17,5 @@ app = do
 
 runServer :: (Config, Pool Connection) -> IO ()
 runServer (config, pool) = do
-  x <- withResource pool $ findByTags ["fofo", "test"]
+  x <- withResource pool $ findByTags ["foo", "test"]
   print x

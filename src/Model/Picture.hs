@@ -11,7 +11,6 @@ import Data.Maybe
 import Data.Text (Text)
 import Data.UUID
 
-import Database.PostgreSQL.Simple.Types (PGArray)
 import qualified Database.PostgreSQL.Simple              as TQ
 import qualified Database.PostgreSQL.Simple.TypedQuery   as TQ
 import Data.String.QM
@@ -23,7 +22,8 @@ data Picture = Picture {
   fileName :: Text,
   fileHash :: Text,
   url      :: Text,
-  mimeType :: Text
+  mimeType :: Text,
+  tags     :: [Text]
 } deriving (Show)
 
 instance FromJSON Picture where
@@ -33,7 +33,8 @@ instance FromJSON Picture where
     fileHash  <-  v .: "file_hash"
     url       <-  v .: "url"
     mimeType  <-  v .: "mime_type"
-    return (Picture uuid fileName fileHash url mimeType)
+    tags      <-  v .: "tags"
+    return (Picture uuid fileName fileHash url mimeType tags)
 
   parseJSON _ = empty
 
@@ -43,23 +44,28 @@ instance FromJSON Picture where
 getByUuid :: Text -> TQ.Connection -> IO (Maybe (Either String Picture))
 getByUuid uuid conn = do
   $(TQ.genJsonQuery [qq|
-    select uuid      as uuid                     -- UUID
-         , file_name as file_name                -- Text
-         , url       as url                      -- Text
-         , mime_type as mime_type                -- Text
-         , file_hash as file_hash                -- Text
-    from pictures
-    where uuid = ?                               -- < uuid
+    select p.uuid                 as uuid        -- UUID
+         , p.file_name            as file_name   -- Text
+         , p.url                  as url         -- Text
+         , p.mime_type            as mime_type   -- Text
+         , p.file_hash            as file_hash   -- Text
+         , array_agg(pt.tag)      as tags        -- [Text]
+    from pictures p
+    left join picture_tags pt
+      on pt.picture_uuid = p.uuid
+    where puuid = ?                              -- < uuid
+    group by p.uuid
   |]) conn >>= parseOne
 
 findByTags :: [Text] -> TQ.Connection -> IO (Either String [Picture])
 findByTags tags conn = do
   $(TQ.genJsonQuery [qq|
-    select p.uuid      as uuid                   -- UUID
-         , p.file_name as file_name              -- Text
-         , p.url       as url                    -- Text
-         , p.mime_type as mime_type              -- Text
-         , p.file_hash as file_hash              -- Text
+    select p.uuid                 as uuid        -- UUID
+         , p.file_name            as file_name   -- Text
+         , p.url                  as url         -- Text
+         , p.mime_type            as mime_type   -- Text
+         , p.file_hash            as file_hash   -- Text
+         , array_agg(pt.tag)      as tags        -- [Text]
     from pictures p
     inner join picture_tags pt
       on pt.picture_uuid = p.uuid
@@ -76,4 +82,5 @@ findByTags tags conn = do
         ?                                        -- < tags
       )
     )
+    group by p.uuid
   |]) conn >>= parseMany
