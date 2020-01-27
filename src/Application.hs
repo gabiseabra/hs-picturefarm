@@ -17,5 +17,5 @@ app = do
 
 runServer :: (Config, Pool Connection) -> IO ()
 runServer (config, pool) = do
-  x <- withResource pool $ getByUuid "d59b1c9e-7e7f-4319-bad0-ded4b8f34cf7"
+  x <- withResource pool $ findByTags ["fofo", "test"]
   print x
