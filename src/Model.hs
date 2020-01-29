@@ -13,6 +13,7 @@ import Database.PostgreSQL.Simple.ToField (ToField(..))
 import Database.PostgreSQL.Simple.FromField (FromField(..))
 import Database.PostgreSQL.Simple.Types (PGArray(..))
 
+-- Postgres field parsers
 ----------------------------------------------------------------------
 
 instance (ToField a) => ToField [a] where
@@ -21,6 +22,7 @@ instance (ToField a) => ToField [a] where
 instance (FromField a, Typeable a) => FromField [a] where
   fromField f v = fromPGArray <$> fromField f v
 
+-- Model helpers
 ----------------------------------------------------------------------
 
 safeHead :: [a] -> Maybe a

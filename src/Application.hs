@@ -3,18 +3,13 @@ module Application (app) where
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Except
 
-import Data.Pool
-import Database.PostgreSQL.Simple
+import Data.Pool (withResource)
 
 import Config
 import Model.Picture
 
 app :: IO ()
-app = do
-  init <- runExceptT initialize
-  case init of
-    Left err -> putStrLn err
-    Right config -> runServer config
+app = initialize >>= runServer
 
 runServer :: (Config, Pool Connection) -> IO ()
 runServer (config, pool) = do

@@ -1,42 +1,14 @@
 module Config (
-  Init,
-  Config,
-  initialize
+  initialize,
+  module Config.Env,
+  module Config.Connection
 ) where
 
-import GHC.Generics
+import Config.Env
+import Config.Connection
 
-import Control.Monad.Except (ExceptT (..), throwError)
-import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.Trans (liftIO)
-
-import Data.Pool
-import Database.PostgreSQL.Simple
-import Database.PostgreSQL.Simple.URL
-
-import LoadEnv
-import System.Envy
-
-data Config = Config {
-  databaseUrl :: [Char]
-} deriving (Generic, Show)
-
-instance FromEnv Config
-
-type Init a = ExceptT String IO a
-
-loadConfig :: Init Config
-loadConfig = ExceptT $ liftIO $ loadEnv >> decodeEnv
-
-createConnectionsPool :: Config -> Init (Pool Connection)
-createConnectionsPool config =
-  case parseDatabaseUrl . databaseUrl $ config of
-    Just connectionInfo ->
-      liftIO $ createPool (connect connectionInfo) close 2 5 10
-    _ -> throwError "Invalid database url"
-
-initialize :: Init (Config, Pool Connection)
+initialize :: IO (Config, Pool Connection)
 initialize = do
   config <- loadConfig
-  conn <- createConnectionsPool config
-  return (config, conn)
+  pool   <- createConnectionPool config
+  return (config, pool)
