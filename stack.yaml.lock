@@ -25,9 +25,16 @@ packages:
       sha256: 90791454d3b33f660240e1c92cf8a1270e2b5f5a3cde509160e09d2630d24139
   original:
     hackage: typedquery-0.1.1.2
+- completed:
+    hackage: ghc-prim-0.5.3@sha256:2284e90b0d56dfd389588b5c927e7f22c17f1d6c2291464cb0cc3f9651b0ba23,2319
+    pantry-tree:
+      size: 1243
+      sha256: 0cfcb729cad4238cabfa57c5b68ae66475415237cd08c25b9fc804dd10bb8bc0
+  original:
+    hackage: ghc-prim-0.5.3
 snapshots:
 - completed:
-    size: 524162
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/14/21.yaml
-    sha256: 9a55dd75853718f2bbbe951872b36a3b7802fcd71796e0f25b8664f24e34c666
-  original: lts-14.21
+    size: 524164
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/14/22.yaml
+    sha256: 7ad8f33179b32d204165a3a662c6269464a47a7e65a30abc38d01b5a38ec42c0
+  original: lts-14.22

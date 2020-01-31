@@ -37,6 +37,7 @@ dependencies:
 - transformers
 - envy
 - load-env
+- directory
 - typedquery
 - postgresql-simple
 - postgresql-simple-url
@@ -67,3 +68,7 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - hs-picturefarm
+    - hspec
+    - hspec-discover
+    - cryptohash-md5
+    - bytestring

@@ -17,7 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-14.21
+resolver: lts-14.22
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -43,6 +43,7 @@ extra-deps:
 - morpheus-graphql-0.10.0
 - postgresql-simple-typed-0.1.1.1
 - typedquery-0.1.1.2
+- ghc-prim-0.5.3
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

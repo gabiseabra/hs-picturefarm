@@ -1,5 +1,5 @@
 module Model.Picture (
-  Picture,
+  Picture(..),
   getByUuid,
   findByTags
 ) where
@@ -13,7 +13,7 @@ import Data.Text (Text)
 import Data.UUID
 import Data.String.QM
 
-import qualified Database.PostgreSQL.Simple              as TQ
+import qualified Database.PostgreSQL.Simple              as PG
 import qualified Database.PostgreSQL.Simple.TypedQuery   as TQ
 
 import Model (parseOne, parseMany)
@@ -42,7 +42,7 @@ instance FromJSON Picture where
 -- Queries
 ----------------------------------------------------------------------
 
-getByUuid :: Text -> TQ.Connection -> IO (Maybe (Either String Picture))
+getByUuid :: UUID -> PG.Connection -> IO (Either String Picture)
 getByUuid uuid conn = do
   $(TQ.genJsonQuery [qq|
     select p.uuid                 as uuid        -- UUID
@@ -54,11 +54,11 @@ getByUuid uuid conn = do
     from pictures p
     left join picture_tags pt
       on pt.picture_uuid = p.uuid
-    where puuid = ?                              -- < uuid
+    where p.uuid = ?                             -- < uuid
     group by p.uuid
   |]) conn >>= parseOne
 
-findByTags :: [Text] -> TQ.Connection -> IO (Either String [Picture])
+findByTags :: [Text] -> PG.Connection -> IO (Either String [Picture])
 findByTags tags conn = do
   $(TQ.genJsonQuery [qq|
     select p.uuid                 as uuid        -- UUID

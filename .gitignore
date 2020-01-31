@@ -1,4 +1,5 @@
 .env
+.env.test
 .stack-work/
 hs-picturefarm.cabal
 *~
