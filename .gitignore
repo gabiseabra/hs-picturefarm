@@ -1,5 +1,7 @@
 .env
 .env.test
 .stack-work/
+dist-newstyle/
+tmp/
 hs-picturefarm.cabal
 *~

@@ -1,0 +1,8 @@
+cradle:
+  stack:
+    - path: ./app
+      component: "hs-picturefarm:exe:hs-picturefarm-exe"
+    - path: ./src
+      component: "hs-picturefarm:lib"
+    - path: ./test
+      component: "hs-picturefarm:test:hs-picturefarm-test"
