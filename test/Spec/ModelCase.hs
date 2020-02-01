@@ -62,8 +62,13 @@ insertTagAliases conn input =
 
 cleanUpDB :: Connection -> IO Connection
 cleanUpDB conn = do
-  _ <- execute_ conn "truncate tag_aliases cascade"
-  _ <- execute_ conn "truncate picture_tags cascade"
-  _ <- execute_ conn "truncate pictures cascade"
+  _ <- execute_
+    conn
+    [sql|
+    set client_min_messages to warning;
+    truncate tag_aliases cascade;
+    truncate picture_tags cascade;
+    truncate pictures cascade;
+    |]
   return conn
 
