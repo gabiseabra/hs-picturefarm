@@ -52,10 +52,10 @@ spec = around hook $ do
           getByUuid actual_uuid conn
             >>= (`shouldBeRightAnd` ((== actual_uuid) . uuid))
 
-      it "returns \"Not Found\" with invalid uuid" $ \(conn, _) -> do
+      it "returns NotFound with invalid uuid" $ \(conn, _) -> do
         UUIDv4.nextRandom
           >>= flip getByUuid conn
-          >>= (`shouldBeLeftAnd` (== "Not Found"))
+          >>= (`shouldBeLeftAnd` (== NotFound))
 
     describe "findByTags" $ do
       it "queries pictures with a given tag" $ \(conn, _) -> do

@@ -1,11 +1,13 @@
 module Model
-  ( parseOne
+  ( RecordError(..)
+  , parseOne
   , parseMany
   )
 where
 
 import           Control.Monad
 
+import           Data.Either.Combinators
 import           Data.Aeson
 import           Data.Aeson.Types               ( parseJSON
                                                 , parseJSONList
@@ -33,9 +35,12 @@ instance (FromField a, Typeable a) => FromField [a] where
 -- Model helpers
 ----------------------------------------------------------------------
 
-parseOne :: (FromJSON a) => [Value] -> IO (Either String a)
-parseOne []           = return $ Left "Not Found"
-parseOne (record : _) = return . parseEither parseJSON $ record
+data RecordError = NotFound | ParseError String deriving (Show, Eq)
 
-parseMany :: (FromJSON a) => [Value] -> IO (Either String [a])
-parseMany = return . mapM (parseEither parseJSON)
+parseOne :: (FromJSON a) => [Value] -> IO (Either RecordError a)
+parseOne [] = return $ Left NotFound
+parseOne (record : _) =
+  return . mapLeft ParseError . parseEither parseJSON $ record
+
+parseMany :: (FromJSON a) => [Value] -> IO (Either RecordError [a])
+parseMany = return . mapLeft ParseError . mapM (parseEither parseJSON)
