@@ -1,21 +1,26 @@
-module Config.Env (
-  EnvException,
-  Config(..),
-  loadConfig
-) where
+module Config.Env
+  ( EnvException
+  , Config(..)
+  , loadConfig
+  )
+where
 
-import GHC.Generics
+import           GHC.Generics
 
-import System.Directory        (getCurrentDirectory)
-import System.IO               (IO, FilePath)
+import           System.Directory               ( getCurrentDirectory )
+import           System.IO                      ( IO
+                                                , FilePath
+                                                )
 
-import Control.Exception
-import Control.Applicative
-import Control.Monad.IO.Class  (liftIO)
+import           Control.Exception
+import           Control.Applicative
+import           Control.Monad.IO.Class         ( liftIO )
 
-import LoadEnv                 (loadEnvFrom)
-import System.Envy             (FromEnv, decodeEnv)
-import System.Environment      (lookupEnv)
+import           LoadEnv                        ( loadEnvFrom )
+import           System.Envy                    ( FromEnv
+                                                , decodeEnv
+                                                )
+import           System.Environment             ( lookupEnv )
 
 -- Exceptions
 ----------------------------------------------------------------------
@@ -51,5 +56,5 @@ loadConfig = do
   _   <- envFileName >>= loadEnvFrom
   env <- decodeEnv :: IO (Either String Config)
   case env of
-    Left err     -> throw (DecodeException err)
+    Left  err    -> throw (DecodeException err)
     Right config -> return config

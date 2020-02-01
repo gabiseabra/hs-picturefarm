@@ -13,7 +13,7 @@ import           Data.String.QM
 import           Control.Arrow
 import           Control.Monad
 
--- Set up
+-- Set up fixtures
 ----------------------------------------------------------------------
 
 pictures :: [PictureInput]
@@ -29,16 +29,16 @@ pictureTags uuids = zip uuids [["a", "b"], ["a'"], ["c"]]
 tagAliases :: [TagAliasInput]
 tagAliases = [("a", "a'")]
 
-setup :: Connection -> IO (Connection, [UUID])
-setup conn = do
+setupFixtures :: Connection -> IO (Connection, [UUID])
+setupFixtures conn = do
   uuids <- insertPictures conn pictures
   _     <- insertPictureTags conn $ pictureTags uuids
   _     <- insertTagAliases conn tagAliases
   return (conn, uuids)
 
 hook :: ((Connection, [UUID]) -> IO ()) -> IO ()
-hook =
-  bracket (openConnection >>= setup) ((cleanUpDB >=> closeConnection) <<< fst)
+hook = bracket (openConnection >>= setupFixtures)
+               ((cleanupDB >=> closeConnection) <<< fst)
 
 -- Tests
 ----------------------------------------------------------------------
@@ -58,9 +58,17 @@ spec = around hook $ do
           >>= (`shouldBeLeftAnd` (== "Not Found"))
 
     describe "findByTags" $ do
-      it "returns multiple pictures with a given tag" $ \(conn, _) -> do
+      it "queries pictures with a given tag" $ \(conn, _) -> do
         findByTags ["a"] conn
           >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test2.jpg"])
+                                  . sort
+                                  . map fileName
+                                  )
+              )
+
+      it "queries pictures with any of the given tag" $ \(conn, _) -> do
+        findByTags ["b", "c"] conn
+          >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test3.jpg"])
                                   . sort
                                   . map fileName
                                   )

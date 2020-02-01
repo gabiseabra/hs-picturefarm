@@ -1,12 +1,15 @@
-module Application (app) where
+module Application
+  ( app
+  )
+where
 
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Except
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Except
 
-import Data.Pool (withResource)
+import           Data.Pool                      ( withResource )
 
-import Config
-import Model.Picture
+import           Config
+import           Model.Picture
 
 app :: IO ()
 app = initialize >>= runServer

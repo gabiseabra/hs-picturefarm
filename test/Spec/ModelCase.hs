@@ -8,7 +8,7 @@ module Spec.ModelCase
   , insertPictures
   , insertPictureTags
   , insertTagAliases
-  , cleanUpDB
+  , cleanupDB
   )
 where
 
@@ -60,8 +60,8 @@ insertTagAliases :: Connection -> [TagAliasInput] -> IO ()
 insertTagAliases conn input =
   executeMany conn insertTagAliasQuery input >> return ()
 
-cleanUpDB :: Connection -> IO Connection
-cleanUpDB conn = do
+cleanupDB :: Connection -> IO Connection
+cleanupDB conn = do
   _ <- execute_
     conn
     [sql|

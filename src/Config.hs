@@ -1,11 +1,12 @@
-module Config (
-  initialize,
-  module Config.Env,
-  module Config.Connection
-) where
+module Config
+  ( initialize
+  , module Config.Env
+  , module Config.Connection
+  )
+where
 
-import Config.Env
-import Config.Connection
+import           Config.Env
+import           Config.Connection
 
 initialize :: IO (Config, Pool Connection)
 initialize = do
