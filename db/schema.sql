@@ -117,6 +117,13 @@ ALTER TABLE ONLY public.tag_aliases
 
 
 --
+-- Name: pictures_updated_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX pictures_updated_at_idx ON public.pictures USING btree (updated_at DESC);
+
+
+--
 -- Name: picture_tags picture_tags_picture_uuid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 

@@ -22,7 +22,6 @@ pictures =
   [ ("test1.jpg", "test1.jpg", md5 "test1", "image/jpg")
   , ("test2.jpg", "test2.jpg", md5 "test2", "image/jpg")
   , ("test3.jpg", "test3.jpg", md5 "test3", "image/jpg")
-  , ("test4.jpg", "test4.jpg", md5 "test4", "image/jpg")
   ]
 
 pictureTags :: [UUID] -> [PictureTagInput]
@@ -86,7 +85,7 @@ spec = around hook $ do
         findByTags
             (["d"], Just (PaginationInput { page = Just 2, pageSize = Just 2 }))
             conn
-          >>= (`shouldBeRightAnd` ((== 2) . length))
+          >>= (`shouldBeRightAnd` ((== 1) . length))
         findByTags
             (["d"], Just (PaginationInput { page = Just 3, pageSize = Just 2 }))
             conn

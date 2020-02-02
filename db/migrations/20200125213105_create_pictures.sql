@@ -1,5 +1,7 @@
 -- migrate:up
 
+create extension if not exists "uuid-ossp" with schema public;
+
 create table pictures (
   uuid uuid not null primary key default uuid_generate_v4(),
   file_name varchar not null,
@@ -9,6 +11,8 @@ create table pictures (
   created_at timestamp with time zone default now() not null,
   updated_at timestamp with time zone default now() not null
 );
+
+create index pictures_updated_at_idx on pictures (updated_at desc);
 
 -- migrate:down
 

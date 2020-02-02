@@ -3,7 +3,7 @@
 create table tag_aliases (
   tag varchar not null,
   alias varchar not null,
-  PRIMARY KEY (tag, alias)
+  primary key (tag, alias)
 );
 
 -- migrate:down
