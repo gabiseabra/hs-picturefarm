@@ -6,6 +6,7 @@ where
 import           Env
 import           GraphQL
 
+import           Control.Arrow
 import           Control.Applicative
 import           Control.Monad.IO.Class         ( liftIO )
 import           Control.Monad.Trans.Except
@@ -24,7 +25,11 @@ main = initialize >>= runServer
 
 application :: ScottyT Text EnvM ()
 application = do
-  get "/api" $ file "public/playground.html"
+  get "/api" $ do
+    env <- lift $ asks environment
+    case env of
+      Just Production -> sendError status404
+      _               -> file "public/playground.html"
 
   post "/api" $ do
     response    <- api <$> (lift $ asks conn) <*> body
@@ -33,9 +38,14 @@ application = do
     status status200
     raw rawResponse
 
-  notFound $ do
-    status status404
-    text "Not found"
+  notFound $ sendError status404
 
 runServer :: AppContext -> IO ()
 runServer ctx@(_, config, _) = scottyT (port config) (runEnvIO ctx) application
+
+----------------------------------------------------------------------
+
+sendError :: (ScottyError e, Monad m) => Status -> ActionT e m ()
+sendError s = status s >> sendErrorMessage s
+
+sendErrorMessage (status404) = text "Not found"
