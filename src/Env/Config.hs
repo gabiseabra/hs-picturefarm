@@ -9,11 +9,6 @@ where
 
 import           GHC.Generics
 
-import           System.Directory               ( getCurrentDirectory )
-import           System.IO                      ( IO
-                                                , FilePath
-                                                )
-
 import           Control.Exception
 import           Control.Applicative
 

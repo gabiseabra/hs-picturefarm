@@ -24,11 +24,14 @@ main = initialize >>= runServer
 
 application :: ScottyT Text EnvM ()
 application = do
+  get "/api" $ file "public/playground.html"
+
   post "/api" $ do
-    response <- liftIO (api <$> (lift $ asks conn) <*> body)
+    response    <- api <$> (lift $ asks conn) <*> body
+    rawResponse <- liftIO response
     setHeader "Content-Type" "application/json; charset=utf-8"
     status status200
-    raw response
+    raw rawResponse
 
   notFound $ do
     status status404
