@@ -22,7 +22,7 @@ import           Database.PostgreSQL.Simple
 import           Database.PostgreSQL.Simple.SqlQQ
 
 openConnection :: IO Connection
-openConnection = loadConfig >>= createConnection
+openConnection = loadConfig (Just Test) >>= createConnection
 
 closeConnection :: Connection -> IO ()
 closeConnection conn = close conn

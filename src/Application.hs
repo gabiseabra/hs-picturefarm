@@ -28,4 +28,4 @@ application = do
     text "Not found"
 
 runServer :: AppContext -> IO ()
-runServer ctx@(config, _) = scottyT (port config) (runEnvIO ctx) application
+runServer ctx@(_, config, _) = scottyT (port config) (runEnvIO ctx) application

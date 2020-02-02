@@ -27,11 +27,12 @@ import           Data.Pool                      ( takeResource )
 -- Application environment
 ----------------------------------------------------------------------
 
-type AppContext = (Config, Pool Connection)
+type AppContext = (Maybe Environment, Config, Pool Connection)
 
 data Env = Env {
-  conn   :: Connection,
-  config :: Config
+  environment :: Maybe Environment,
+  config      :: Config,
+  conn        :: Connection
 }
 
 newtype EnvM a
@@ -49,14 +50,15 @@ newtype EnvM a
 
 initialize :: IO AppContext
 initialize = do
-  config <- loadConfig
+  env    <- getEnvironment
+  config <- loadConfig env
   pool   <- createConnectionPool config
-  return (config, pool)
+  return (env, config, pool)
 
 getEnv :: AppContext -> IO Env
-getEnv (config, pool) = do
+getEnv (environment, config, pool) = do
   (conn, _) <- takeResource pool
-  return Env { conn, config }
+  return Env { environment, conn, config }
 
 runEnvIO :: AppContext -> EnvM a -> IO a
 runEnvIO ctx m = do
