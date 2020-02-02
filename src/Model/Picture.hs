@@ -6,9 +6,10 @@ module Model.Picture
 where
 
 import           Model
+import           Model.Pagination
 
 import           Control.Monad
-import           Control.Applicative
+import           Control.Applicative (empty)
 
 import           Data.Aeson
 import           Data.Maybe
@@ -17,7 +18,7 @@ import           Data.UUID
 import           Data.String.QM
 
 import qualified Database.PostgreSQL.Simple            as PG
-import qualified Database.PostgreSQL.Simple.TypedQuery as TQ
+import Database.PostgreSQL.Simple.TypedQuery (genJsonQuery)
 
 data Picture = Picture {
   uuid     :: UUID,
@@ -45,7 +46,7 @@ instance FromJSON Picture where
 
 getByUuid :: UUID -> PG.Connection -> IO (Either RecordError Picture)
 getByUuid uuid conn = do
-  $(TQ.genJsonQuery [qq|
+  $(genJsonQuery [qq|
     select p.uuid                 as uuid        -- UUID
          , p.file_name            as file_name   -- Text
          , p.url                  as url         -- Text
@@ -59,9 +60,10 @@ getByUuid uuid conn = do
     group by p.uuid
   |]) conn >>= parseOne
 
-findByTags :: [Text] -> PG.Connection -> IO (Either RecordError [Picture])
-findByTags tags conn = do
-  $(TQ.genJsonQuery [qq|
+findByTags :: ([Text], Maybe PaginationInput) -> PG.Connection -> IO (Either RecordError [Picture])
+findByTags (tags, pgn) conn =
+  let PaginationParams {..} = parsePaginationInput pgn
+  in $(genJsonQuery [qq|
     select p.uuid                 as uuid        -- UUID
          , p.file_name            as file_name   -- Text
          , p.url                  as url         -- Text
@@ -85,4 +87,7 @@ findByTags tags conn = do
       )
     )
     group by p.uuid
+    order by updated_at desc
+    limit ?                                      -- < limit
+    offset ?                                     -- < offset
   |]) conn >>= parseMany

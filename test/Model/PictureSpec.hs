@@ -2,6 +2,7 @@ module Model.PictureSpec where
 
 import           Spec.ModelCase
 
+import           Model.Pagination
 import           Model.Picture
 
 import           Data.UUID
@@ -21,10 +22,11 @@ pictures =
   [ ("test1.jpg", "test1.jpg", md5 "test1", "image/jpg")
   , ("test2.jpg", "test2.jpg", md5 "test2", "image/jpg")
   , ("test3.jpg", "test3.jpg", md5 "test3", "image/jpg")
+  , ("test4.jpg", "test4.jpg", md5 "test4", "image/jpg")
   ]
 
 pictureTags :: [UUID] -> [PictureTagInput]
-pictureTags uuids = zip uuids [["a", "b"], ["a'"], ["c"]]
+pictureTags uuids = zip uuids [["a", "b", "d"], ["a'", "d"], ["c", "d"], ["d"]]
 
 tagAliases :: [TagAliasInput]
 tagAliases = [("a", "a'")]
@@ -59,7 +61,7 @@ spec = around hook $ do
 
     describe "findByTags" $ do
       it "queries pictures with a given tag" $ \(conn, _) -> do
-        findByTags ["a"] conn
+        findByTags (["a"], Nothing) conn
           >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test2.jpg"])
                                   . sort
                                   . map fileName
@@ -67,12 +69,29 @@ spec = around hook $ do
               )
 
       it "queries pictures with any of the given tag" $ \(conn, _) -> do
-        findByTags ["b", "c"] conn
+        findByTags (["b", "c"], Nothing) conn
           >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test3.jpg"])
                                   . sort
                                   . map fileName
                                   )
               )
+
+      it "paginates results" $ \(conn, _) -> do
+        findByTags
+            ( ["d"]
+            , Just (PaginationInput { page = Nothing, pageSize = Just 2 })
+            )
+            conn
+          >>= (`shouldBeRightAnd` ((== 2) . length))
+        findByTags
+            (["d"], Just (PaginationInput { page = Just 2, pageSize = Just 2 }))
+            conn
+          >>= (`shouldBeRightAnd` ((== 2) . length))
+        findByTags
+            (["d"], Just (PaginationInput { page = Just 3, pageSize = Just 2 }))
+            conn
+          >>= (`shouldBeRightAnd` ((== 0) . length))
+
 
 main :: IO ()
 main = hspec $ spec

@@ -10,7 +10,6 @@ import           Control.Monad
 import           Data.Either.Combinators
 import           Data.Aeson
 import           Data.Aeson.Types               ( parseJSON
-                                                , parseJSONList
                                                 , parseEither
                                                 , listValue
                                                 )
