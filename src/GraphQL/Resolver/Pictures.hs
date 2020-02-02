@@ -27,6 +27,10 @@ import           Data.Morpheus.Types
 
 data Picture = Picture
   { uuid      :: UUID
+  , url       :: Text
+  , fileName  :: Text
+  , mimeType  :: Text
+  , tags      :: [Text]
   } deriving (Generic, GQLType)
 
 data PictureArgs = PictureArgs
@@ -36,12 +40,12 @@ data PictureArgs = PictureArgs
 -- Resolvers
 ----------------------------------------------------------------------
 
-mapRecord :: (GQLType b) => (a -> b) -> Either RecordError a -> Either String b
-mapRecord = mapBoth show
-
 transform :: DB.Picture -> Picture
-transform picture = Picture { uuid = DB.uuid picture }
+transform DB.Picture {..} = Picture { uuid, url, fileName, mimeType, tags }
+
+mapRecord :: Either RecordError DB.Picture -> Either String Picture
+mapRecord = mapBoth show transform
 
 pictureResolver :: Connection -> PictureArgs -> IORes e Picture
 pictureResolver conn PictureArgs { uuid } =
-  liftEither . liftM (mapRecord transform) $ DB.getByUuid uuid conn
+  liftEither . liftM mapRecord $ DB.getByUuid uuid conn

@@ -28,6 +28,7 @@ default-extensions:
 - NamedFieldPuns
 - DisambiguateRecordFields
 - DuplicateRecordFields
+- RecordWildCards
 
 dependencies:
 - base >= 4.7 && < 5
