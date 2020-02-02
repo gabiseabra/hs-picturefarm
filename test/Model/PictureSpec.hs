@@ -11,7 +11,7 @@ import           Data.Text                      ( Text )
 import           Data.String.QM
 
 import           Control.Arrow
-import           Control.Monad
+import           Control.Composition
 
 -- Set up fixtures
 ----------------------------------------------------------------------

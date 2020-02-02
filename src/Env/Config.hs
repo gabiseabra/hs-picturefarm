@@ -9,11 +9,6 @@ where
 
 import           GHC.Generics
 
-import           System.Directory               ( getCurrentDirectory )
-import           System.IO                      ( IO
-                                                , FilePath
-                                                )
-
 import           Control.Exception
 import           Control.Applicative
 
@@ -54,6 +49,7 @@ getEnvironment = do
     Just "test" -> return (Just Test)
     Just "prod" -> return (Just Production)
     Just "dev"  -> return (Just Development)
+    _           -> return Nothing
 
 envFileName :: Maybe Environment -> String
 envFileName (Just Test       ) = ".env.test"

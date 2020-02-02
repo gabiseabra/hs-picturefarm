@@ -32,6 +32,13 @@ packages:
       sha256: 0cfcb729cad4238cabfa57c5b68ae66475415237cd08c25b9fc804dd10bb8bc0
   original:
     hackage: ghc-prim-0.5.3
+- completed:
+    hackage: composition-prelude-2.0.5.0@sha256:2e18aa0baa6ba527b086261f077a10c2786594879f6c0cbcb50464b9d69b1521,1149
+    pantry-tree:
+      size: 284
+      sha256: c05343a0bfe62dd3e14ebf89e440cf5bc9148957f2596efcaf0c9553f235befc
+  original:
+    hackage: composition-prelude-2.0.5.0
 snapshots:
 - completed:
     size: 524164

@@ -24,11 +24,15 @@ default-extensions:
 - QuasiQuotes
 - OverloadedStrings
 - DeriveGeneric
-- GeneralizedNewtypeDeriving
+- TypeFamilies
 - NamedFieldPuns
+- DisambiguateRecordFields
+- DuplicateRecordFields
+- RecordWildCards
 
 dependencies:
 - base >= 4.7 && < 5
+- composition-prelude
 - mtl
 - text
 - tuple
@@ -41,7 +45,6 @@ dependencies:
 - transformers
 - envy
 - load-env
-- directory
 - typedquery
 - postgresql-simple
 - postgresql-simple-url
