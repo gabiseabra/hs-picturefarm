@@ -1,4 +1,4 @@
-module Config.Env
+module Env.Config
   ( EnvException
   , Config(..)
   , loadConfig
@@ -35,7 +35,8 @@ instance Exception EnvException
 ----------------------------------------------------------------------
 
 data Config = Config {
-  databaseUrl :: String
+  databaseUrl :: String,
+  port        :: Int
 } deriving (Generic, Show)
 
 instance FromEnv Config

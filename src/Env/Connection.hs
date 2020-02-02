@@ -1,4 +1,4 @@
-module Config.Connection
+module Env.Connection
   ( Pool
   , Connection
   , ConnectionException
@@ -7,6 +7,8 @@ module Config.Connection
   )
 where
 
+import           Env.Config
+
 import           System.IO                      ( IO )
 
 import           Control.Exception
@@ -14,8 +16,6 @@ import           Control.Exception
 import           Data.Pool
 import           Database.PostgreSQL.Simple
 import           Database.PostgreSQL.Simple.URL
-
-import           Config.Env
 
 -- Exceptions
 ----------------------------------------------------------------------

@@ -20,10 +20,12 @@ extra-source-files:
 description:         Please see the README on GitHub at <https://github.com/gabiseabra/hs-picturefarm#readme>
 
 default-extensions:
-- DeriveGeneric
 - TemplateHaskell
 - QuasiQuotes
 - OverloadedStrings
+- DeriveGeneric
+- GeneralizedNewtypeDeriving
+- NamedFieldPuns
 
 dependencies:
 - base >= 4.7 && < 5
@@ -33,6 +35,7 @@ dependencies:
 - either
 - aeson
 - uuid
+- bytestring
 - rawstring-qm
 - resource-pool
 - transformers
@@ -44,6 +47,8 @@ dependencies:
 - postgresql-simple-url
 - postgresql-simple-typed
 - morpheus-graphql
+- http-types
+- scotty
 
 library:
   source-dirs: src
@@ -72,4 +77,3 @@ tests:
     - hspec
     - hspec-discover
     - cryptohash-md5
-    - bytestring
