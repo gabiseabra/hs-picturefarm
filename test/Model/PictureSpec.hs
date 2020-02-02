@@ -10,7 +10,7 @@ import           Data.List
 import           Data.Text                      ( Text )
 import           Data.String.QM
 
-import           Control.Arrow
+import           Control.Composition
 import           Control.Monad
 
 -- Set up fixtures

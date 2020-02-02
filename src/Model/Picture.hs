@@ -1,23 +1,23 @@
-module Model.Picture (
-  RecordError(..),
-  Picture(..),
-  getByUuid,
-  findByTags
-) where
+module Model.Picture
+  ( RecordError(..)
+  , Picture(..)
+  , getByUuid
+  , findByTags )
+where
 
 import           Model
 
-import Control.Monad
-import Control.Applicative
+import           Control.Monad
+import           Control.Applicative
 
-import Data.Aeson
-import Data.Maybe
-import Data.Text (Text)
-import Data.UUID
-import Data.String.QM
+import           Data.Aeson
+import           Data.Maybe
+import           Data.Text (Text)
+import           Data.UUID
+import           Data.String.QM
 
-import qualified Database.PostgreSQL.Simple              as PG
-import qualified Database.PostgreSQL.Simple.TypedQuery   as TQ
+import qualified Database.PostgreSQL.Simple            as PG
+import qualified Database.PostgreSQL.Simple.TypedQuery as TQ
 
 data Picture = Picture {
   uuid     :: UUID,

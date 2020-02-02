@@ -44,6 +44,7 @@ extra-deps:
 - postgresql-simple-typed-0.1.1.1
 - typedquery-0.1.1.2
 - ghc-prim-0.5.3
+- composition-prelude-2.0.5.0
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

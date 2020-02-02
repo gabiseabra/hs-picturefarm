@@ -4,11 +4,14 @@ module Application
 where
 
 import           Env
-import           Model.Picture
+import           GraphQL
 
 import           Control.Applicative
-import           Control.Monad.IO.Class
+import           Control.Monad.IO.Class         ( liftIO )
 import           Control.Monad.Trans.Except
+import           Control.Monad.Reader           ( lift
+                                                , asks
+                                                )
 
 import           Data.Text.Lazy                 ( Text )
 import           Data.Pool                      ( withResource )
@@ -21,7 +24,11 @@ main = initialize >>= runServer
 
 application :: ScottyT Text EnvM ()
 application = do
-  get "/" $ text "hello"
+  post "/api" $ do
+    response <- liftIO (api <$> (lift $ asks conn) <*> body)
+    setHeader "Content-Type" "application/json; charset=utf-8"
+    status status200
+    raw response
 
   notFound $ do
     status status404
