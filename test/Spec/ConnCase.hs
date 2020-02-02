@@ -8,6 +8,7 @@ module Spec.ConnCase
   )
 where
 
+import           Env
 import           Spec.TestCase
 
 import           Control.Monad.IO.Class         ( liftIO )
@@ -20,10 +21,8 @@ import qualified Crypto.Hash.MD5               as MD5
 import           Database.PostgreSQL.Simple
 import           Database.PostgreSQL.Simple.SqlQQ
 
-import           Config
-
 openConnection :: IO Connection
-openConnection = loadConfig >>= createConnection
+openConnection = loadConfig (Just Test) >>= createConnection
 
 closeConnection :: Connection -> IO ()
 closeConnection conn = close conn

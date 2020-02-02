@@ -5,6 +5,8 @@ module Model.Picture (
   findByTags
 ) where
 
+import           Model
+
 import Control.Monad
 import Control.Applicative
 
@@ -16,8 +18,6 @@ import Data.String.QM
 
 import qualified Database.PostgreSQL.Simple              as PG
 import qualified Database.PostgreSQL.Simple.TypedQuery   as TQ
-
-import           Model
 
 data Picture = Picture {
   uuid     :: UUID,

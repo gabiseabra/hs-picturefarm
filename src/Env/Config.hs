@@ -1,6 +1,8 @@
-module Config.Env
-  ( EnvException
+module Env.Config
+  ( ConfigException(..)
+  , Environment(..)
   , Config(..)
+  , getEnvironment
   , loadConfig
   )
 where
@@ -14,7 +16,6 @@ import           System.IO                      ( IO
 
 import           Control.Exception
 import           Control.Applicative
-import           Control.Monad.IO.Class         ( liftIO )
 
 import           LoadEnv                        ( loadEnvFrom )
 import           System.Envy                    ( FromEnv
@@ -25,17 +26,20 @@ import           System.Environment             ( lookupEnv )
 -- Exceptions
 ----------------------------------------------------------------------
 
-data EnvException =
+data ConfigException =
   DecodeException String
   deriving Show
 
-instance Exception EnvException
+instance Exception ConfigException
 
 -- Config schema
 ----------------------------------------------------------------------
 
+data Environment = Production | Development | Test
+
 data Config = Config {
-  databaseUrl :: String
+  databaseUrl :: String,
+  port        :: Int
 } deriving (Generic, Show)
 
 instance FromEnv Config
@@ -43,17 +47,22 @@ instance FromEnv Config
 -- Config methods
 ----------------------------------------------------------------------
 
-envFileName :: IO String
-envFileName = do
+getEnvironment :: IO (Maybe Environment)
+getEnvironment = do
   env <- lookupEnv "STACK_ENV"
   case env of
-    Just "test" -> return ".env.test"
-    Just "dev"  -> return ".env.dev"
-    _           -> return ".env"
+    Just "test" -> return (Just Test)
+    Just "prod" -> return (Just Production)
+    Just "dev"  -> return (Just Development)
 
-loadConfig :: IO Config
-loadConfig = do
-  _   <- envFileName >>= loadEnvFrom
+envFileName :: Maybe Environment -> String
+envFileName (Just Test       ) = ".env.test"
+envFileName (Just Development) = ".env.dev"
+envFileName _                  = ".env"
+
+loadConfig :: Maybe Environment -> IO Config
+loadConfig env = do
+  _   <- loadEnvFrom $ envFileName env
   env <- decodeEnv :: IO (Either String Config)
   case env of
     Left  err    -> throw (DecodeException err)
