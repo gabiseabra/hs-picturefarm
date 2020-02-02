@@ -46,51 +46,46 @@ hook = bracket (openConnection >>= setupFixtures)
 
 spec :: Spec
 spec = around hook $ do
-  describe "Model.Picture" $ do
-    describe "getByUuid" $ do
-      it "returns one picture with valid uuid" $ \(conn, (actual_uuid : _)) ->
-        do
-          getByUuid actual_uuid conn
-            >>= (`shouldBeRightAnd` ((== actual_uuid) . uuid))
+  describe "getByUuid" $ do
+    it "returns one picture with valid uuid" $ \(conn, (actual_uuid : _)) -> do
+      getByUuid actual_uuid conn
+        >>= (`shouldBeRightAnd` ((== actual_uuid) . uuid))
 
-      it "returns NotFound with invalid uuid" $ \(conn, _) -> do
-        UUIDv4.nextRandom
-          >>= flip getByUuid conn
-          >>= (`shouldBeLeftAnd` (== NotFound))
+    it "returns NotFound with invalid uuid" $ \(conn, _) -> do
+      UUIDv4.nextRandom
+        >>= flip getByUuid conn
+        >>= (`shouldBeLeftAnd` (== NotFound))
 
-    describe "findByTags" $ do
-      it "queries pictures with a given tag" $ \(conn, _) -> do
-        findByTags (["a"], Nothing) conn
-          >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test2.jpg"])
-                                  . sort
-                                  . map fileName
-                                  )
-              )
-
-      it "queries pictures with any of the given tag" $ \(conn, _) -> do
-        findByTags (["b", "c"], Nothing) conn
-          >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test3.jpg"])
-                                  . sort
-                                  . map fileName
-                                  )
-              )
-
-      it "paginates results" $ \(conn, _) -> do
-        findByTags
-            ( ["d"]
-            , Just (PaginationInput { page = Nothing, pageSize = Just 2 })
+  describe "findByTags" $ do
+    it "queries pictures with a given tag" $ \(conn, _) -> do
+      findByTags (["a"], Nothing) conn
+        >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test2.jpg"])
+                                . sort
+                                . map fileName
+                                )
             )
-            conn
-          >>= (`shouldBeRightAnd` ((== 2) . length))
-        findByTags
-            (["d"], Just (PaginationInput { page = Just 2, pageSize = Just 2 }))
-            conn
-          >>= (`shouldBeRightAnd` ((== 1) . length))
-        findByTags
-            (["d"], Just (PaginationInput { page = Just 3, pageSize = Just 2 }))
-            conn
-          >>= (`shouldBeRightAnd` ((== 0) . length))
 
+    it "queries pictures with any of the given tag" $ \(conn, _) -> do
+      findByTags (["b", "c"], Nothing) conn
+        >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test3.jpg"])
+                                . sort
+                                . map fileName
+                                )
+            )
+
+    it "paginates results" $ \(conn, _) -> do
+      findByTags
+          (["d"], Just (PaginationInput { page = Nothing, pageSize = Just 2 }))
+          conn
+        >>= (`shouldBeRightAnd` ((== 2) . length))
+      findByTags
+          (["d"], Just (PaginationInput { page = Just 2, pageSize = Just 2 }))
+          conn
+        >>= (`shouldBeRightAnd` ((== 1) . length))
+      findByTags
+          (["d"], Just (PaginationInput { page = Just 3, pageSize = Just 2 }))
+          conn
+        >>= (`shouldBeRightAnd` ((== 0) . length))
 
 main :: IO ()
 main = hspec $ spec
