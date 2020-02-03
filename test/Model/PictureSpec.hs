@@ -37,7 +37,7 @@ setupFixtures conn = do
   _     <- insertTagAliases conn tagAliases
   return (conn, uuids)
 
-hook :: ((Connection, [UUID]) -> IO ()) -> IO ()
+hook :: ActionWith (Connection, [UUID]) -> IO ()
 hook = bracket (openConnection >>= setupFixtures)
                ((cleanupDB >=> closeConnection) <<< fst)
 

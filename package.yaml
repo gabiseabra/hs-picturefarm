@@ -80,6 +80,10 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - hs-picturefarm
+    - cryptohash-md5
+    - aeson-qq
     - hspec
     - hspec-discover
-    - cryptohash-md5
+    - hspec-wai
+    - hspec-wai-json
+    - wai-extra
