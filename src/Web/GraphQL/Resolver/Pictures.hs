@@ -34,7 +34,7 @@ data Picture = Picture
   } deriving (Generic, GQLType)
 
 data PictureArgs = PictureArgs
-  { uuid      :: UUID
+  { fileName      :: Text
   } deriving (Generic, GQLType)
 
 -- Resolvers
@@ -47,5 +47,5 @@ mapRecord :: Either RecordError DB.Picture -> Either String Picture
 mapRecord = mapBoth show transform
 
 pictureResolver :: Connection -> PictureArgs -> IORes e Picture
-pictureResolver conn PictureArgs { uuid } =
-  liftEither . liftM mapRecord $ DB.getByUUID uuid conn
+pictureResolver conn PictureArgs { fileName } =
+  liftEither . liftM mapRecord $ DB.getByFileName fileName conn

@@ -34,10 +34,11 @@ setup = before_ setupFixtures . withApplication
 ----------------------------------------------------------------------
 
 picturesQuery = [qq|
-  query pictures($uuid: UUID!) {
-    pictures(uuid: $uuid) {
-      uuid
-      fileNames
+  query picture($fileName: String!) {
+    picture(fileName: $fileName) {
+      fileName
+      mimeType
+      url
     }
   }|]
 
@@ -48,9 +49,14 @@ spec :: Spec
 spec = setup $ do
   describe "picture" $ do
     it "returns a picture" $ do
-      postGQL picturesQuery [json|{uuid: ""}|] `shouldRespondWith` [json|{
+      postGQL picturesQuery [json|{fileName: "test1.jpg"}|]
+        `shouldRespondWith` [json|{
               data: {
-                
+                picture: {
+                  fileName: "test1.jpg",
+                  mimeType: "image/jpg",
+                  url: "test1.jpg"
+                }
               }
             }|]
 
