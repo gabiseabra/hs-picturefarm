@@ -27,8 +27,8 @@ setupFixtures = withConnection $ \conn -> do
   _     <- insertPictureTags conn $ pictureTags uuids
   return ()
 
-setup :: SpecWith Application -> Spec
-setup = before_ setupFixtures . withApplication
+setup :: SpecWith ((), Application) -> Spec
+setup = withApplication setupFixtures
 
 -- Queries
 ----------------------------------------------------------------------

@@ -87,3 +87,4 @@ tests:
     - hspec-wai
     - hspec-wai-json
     - wai-extra
+    - async

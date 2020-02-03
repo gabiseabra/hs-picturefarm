@@ -39,6 +39,13 @@ packages:
       sha256: c05343a0bfe62dd3e14ebf89e440cf5bc9148957f2596efcaf0c9553f235befc
   original:
     hackage: composition-prelude-2.0.5.0
+- completed:
+    hackage: hspec-wai-0.10.1@sha256:56dd9ec1d56f47ef1946f71f7cbf070e4c285f718cac1b158400ae5e7172ef47,2290
+    pantry-tree:
+      size: 809
+      sha256: 17af1c2e709cd84bfda066b9ebb04cdde7f92660c51a1f7401a1e9f766524e93
+  original:
+    hackage: hspec-wai-0.10.1
 snapshots:
 - completed:
     size: 524164
