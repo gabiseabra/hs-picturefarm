@@ -2,6 +2,9 @@ module Model.PictureSpec where
 
 import           Spec.ModelCase
 
+
+import           Defaults
+import           Model.Pagination
 import           Model.Picture
 
 import           Data.UUID

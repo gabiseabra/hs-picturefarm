@@ -2,14 +2,23 @@
 
 module Web.GraphQL.Resolver.Pictures
   ( Picture
-  , PictureArgs
+  , PictureInput
+  , PicturesInput
   , pictureResolver
+  , picturesResolver
   )
 where
 
+import           Model.Picture                  ( FindByTagsInput(..)
+                                                , findByTags
+                                                , getByFileName
+                                                )
 import qualified Model.Picture                 as DB
+                                                ( Picture(..) )
+import           Model.Pagination               ( PaginationInput )
 import           Model                          ( RecordError )
 import           Env                            ( Connection )
+import           Defaults
 
 import           GHC.Generics
 
@@ -33,22 +42,35 @@ data Picture = Picture
   , tags      :: [Text]
   } deriving (Generic, GQLType)
 
-data PictureArgs = PictureArgs
+data PictureInput = PictureArgs
   { fileName      :: Text
+  } deriving (Generic, GQLType)
+
+data PicturesInput = PicturesArgs
+  { tags      :: [Text],
+    pagination :: Maybe PaginationInput
   } deriving (Generic, GQLType)
 
 -- Resolvers
 ----------------------------------------------------------------------
 
-transform :: (Maybe DB.Picture) -> Maybe Picture
-transform Nothing = Nothing
-transform (Just DB.Picture {..}) =
-  Just $ Picture { uuid, url, fileName, mimeType, tags }
+transform :: DB.Picture -> Picture
+transform DB.Picture {..} = Picture { uuid, url, fileName, mimeType, tags }
+
+transformM :: (Maybe DB.Picture) -> Maybe Picture
+transformM = liftM transform
 
 mapRecord
   :: Either RecordError (Maybe DB.Picture) -> Either String (Maybe Picture)
-mapRecord = mapBoth show transform
+mapRecord = mapBoth show transformM
 
-pictureResolver :: Connection -> PictureArgs -> IORes e (Maybe Picture)
+mapRecords :: Either RecordError [DB.Picture] -> Either String [Picture]
+mapRecords = mapBoth show (map transform)
+
+pictureResolver :: Connection -> PictureInput -> IORes e (Maybe Picture)
 pictureResolver conn PictureArgs { fileName } =
-  liftEither . liftM mapRecord $ DB.getByFileName fileName conn
+  liftEither . liftM mapRecord $ getByFileName fileName conn
+
+picturesResolver :: Connection -> PicturesInput -> IORes e [Picture]
+picturesResolver conn PicturesArgs { tags, pagination } =
+  liftEither . liftM mapRecords $ findByTags def { tags, pagination } conn

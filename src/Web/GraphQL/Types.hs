@@ -1,5 +1,9 @@
 module Web.GraphQL.Types where
 
+import           Model.Pagination               ( PaginationInput )
+
+import           GHC.Generics
+
 import           Control.Arrow
 import           Data.Either.Combinators
 
@@ -19,3 +23,9 @@ instance GQLScalar UUID where
 
 instance GQLType UUID where
   type KIND UUID = SCALAR
+
+-- Object types
+----------------------------------------------------------------------
+
+instance GQLType PaginationInput where
+  type KIND PaginationInput = INPUT

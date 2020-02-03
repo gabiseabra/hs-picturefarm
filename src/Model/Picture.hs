@@ -1,7 +1,5 @@
 module Model.Picture
-  ( module Defaults
-  , module Model.Pagination
-  , RecordError(..)
+  ( RecordError(..)
   , Picture(..)
   , OrderBy(..)
   , Order(..)

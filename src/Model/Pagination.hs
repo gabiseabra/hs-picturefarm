@@ -7,6 +7,8 @@ where
 
 import           Model
 
+import           GHC.Generics
+
 import           Data.Maybe
 import           Data.String.QM
 
@@ -18,12 +20,12 @@ import           Database.PostgreSQL.Simple.TypedQuery
 data PaginationInput = PaginationInput {
   page     :: Maybe Int,
   pageSize :: Maybe Int
-} deriving (Show, Eq)
+} deriving (Generic, Show, Eq)
 
 data PaginationParams = PaginationParams {
   limit     :: Int,
   offset    :: Int
-} deriving (Show, Eq)
+} deriving (Generic, Show, Eq)
 
 lim a b c = max a $ min b c
 

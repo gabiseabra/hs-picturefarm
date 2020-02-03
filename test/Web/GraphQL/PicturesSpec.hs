@@ -33,12 +33,20 @@ setup = before_ setupFixtures . withApplication
 -- Queries
 ----------------------------------------------------------------------
 
-picturesQuery = [qq|
+pictureQuery = [qq|
   query picture($fileName: String!) {
     picture(fileName: $fileName) {
       fileName
       mimeType
       url
+    }
+  }|]
+
+picturesQuery = [qq|
+  query pictures($tags: [String!]!, $pagination: PaginationInput) {
+    pictures(tags: $tags, pagination: $pagination) {
+      fileName
+      tags
     }
   }|]
 
@@ -49,7 +57,7 @@ spec :: Spec
 spec = setup $ do
   describe "picture" $ do
     it "returns a picture with a valid file name" $ do
-      postGQL picturesQuery [json|{fileName: "test1.jpg"}|]
+      postGQL pictureQuery [json|{fileName: "test1.jpg"}|]
         `shouldRespondWith` [json|{
               data: {
                 picture: {
@@ -61,8 +69,44 @@ spec = setup $ do
             }|]
 
     it "returns null with an invalid file name" $ do
-      postGQL picturesQuery [json|{fileName: "test0.jpg"}|]
+      postGQL pictureQuery [json|{fileName: "test0.jpg"}|]
         `shouldRespondWith` [json|{data: {picture: null}}|]
 
+  describe "pictures" $ do
+    xit "returns a list of pictures with a given tag" $ do
+      postGQL picturesQuery [json|{tags: ["a"]}|] `shouldRespondWith` [json|{
+              data: {
+                pictures: [
+                  {
+                    fileName: "test1.jpg",
+                    tags: ["a", "b"]
+                  },
+                  {
+                    fileName: "test2.jpg",
+                    tags: ["a"]
+                  }
+                ]
+              }
+            }|]
+
+    xit "returns all pictures when no tags are given" $ do
+      postGQL picturesQuery [json|{tags: []}|] `shouldRespondWith` [json|{
+              data: {
+                pictures: [
+                  {
+                    fileName: "test1.jpg",
+                    tags: ["a", "b"]
+                  },
+                  {
+                    fileName: "test2.jpg",
+                    tags: ["a"]
+                  },
+                  {
+                    fileName: "test2.jpg",
+                    tags: ["b"]
+                  }
+                ]
+              }
+            }|]
 main :: IO ()
 main = hspec $ spec
