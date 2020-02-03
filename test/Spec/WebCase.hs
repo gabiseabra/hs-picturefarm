@@ -1,10 +1,12 @@
 module Spec.WebCase
   ( module Spec.TestCase
   , module Test.Hspec.Wai
+  , Application
   , qq
   , json
   , postGQL
   , withApplication
+  , setupApplication
   )
 where
 

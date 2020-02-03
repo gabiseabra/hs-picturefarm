@@ -25,7 +25,7 @@ pictures =
   ]
 
 pictureTags :: [UUID] -> [PictureTagInput]
-pictureTags uuids = zip uuids [["a", "b", "d"], ["a'", "d"], ["c", "d"], ["d"]]
+pictureTags uuids = zip uuids [["a", "b", "d"], ["a'", "d"], ["c", "d"]]
 
 tagAliases :: [TagAliasInput]
 tagAliases = [("a", "a'")]
@@ -37,9 +37,9 @@ setupFixtures conn = do
   _     <- insertTagAliases conn tagAliases
   return (conn, uuids)
 
-hook :: ActionWith (Connection, [UUID]) -> IO ()
-hook = bracket (openConnection >>= setupFixtures)
-               ((cleanupDB >=> closeConnection) <<< fst)
+setup :: SpecWith (Connection, [UUID]) -> Spec
+setup = around $ bracket (openConnection >>= setupFixtures)
+                         ((cleanupDB >=> closeConnection) <<< fst)
 
 -- Helpers
 ----------------------------------------------------------------------
@@ -51,7 +51,7 @@ mapIds = (map uuid) . (fromRight [])
 ----------------------------------------------------------------------
 
 spec :: Spec
-spec = around hook $ do
+spec = setup $ do
   describe "getByUUID" $ do
     it "returns one picture with valid uuid" $ \(conn, (actual_uuid : _)) -> do
       getByUUID actual_uuid conn
