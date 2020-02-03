@@ -1,4 +1,4 @@
-module GraphQL.Types where
+module Web.GraphQL.Types where
 
 import           Control.Arrow
 import           Data.Either.Combinators

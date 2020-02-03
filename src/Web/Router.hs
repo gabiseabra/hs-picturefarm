@@ -5,7 +5,7 @@ module Web.Router
 where
 
 import           Env
-import qualified GraphQL                       as GQL
+import qualified Web.GraphQL                   as GQL
 
 import           Control.Arrow
 import           Control.Applicative

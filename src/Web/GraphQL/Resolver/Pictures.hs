@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveAnyClass #-}
 
-module GraphQL.Resolver.Pictures
+module Web.GraphQL.Resolver.Pictures
   ( Picture
   , PictureArgs
   , pictureResolver

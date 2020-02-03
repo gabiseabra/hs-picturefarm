@@ -21,10 +21,8 @@ main = do
   print ("Starting server on http://localhost:" ++ show (port config))
   runSettings (warpSettings config) app
 
-onException _req e = do
-  print ("Error: " ++ show e)
+onException _req e = print ("Error: " ++ show e)
 
 warpSettings :: Config -> Settings
 warpSettings config@Config { port } =
   setPort port $ setOnException onException $ defaultSettings
-
