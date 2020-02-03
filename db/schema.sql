@@ -60,8 +60,8 @@ CREATE TABLE public.pictures (
     file_hash character(32) NOT NULL,
     url character varying NOT NULL,
     mime_type character varying NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp(6) without time zone DEFAULT now() NOT NULL,
+    updated_at timestamp(6) without time zone DEFAULT now() NOT NULL
 );
 
 
@@ -80,7 +80,9 @@ CREATE TABLE public.schema_migrations (
 
 CREATE TABLE public.tag_aliases (
     tag character varying NOT NULL,
-    alias character varying NOT NULL
+    alias character varying NOT NULL,
+    created_at timestamp(6) without time zone DEFAULT now() NOT NULL,
+    updated_at timestamp(6) without time zone DEFAULT now() NOT NULL
 );
 
 
@@ -114,6 +116,13 @@ ALTER TABLE ONLY public.schema_migrations
 
 ALTER TABLE ONLY public.tag_aliases
     ADD CONSTRAINT tag_aliases_pkey PRIMARY KEY (tag, alias);
+
+
+--
+-- Name: pictures_updated_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX pictures_updated_at_idx ON public.pictures USING btree (updated_at DESC);
 
 
 --

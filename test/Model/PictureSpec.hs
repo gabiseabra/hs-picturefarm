@@ -9,6 +9,7 @@ import qualified Data.UUID.V4                  as UUIDv4
 import           Data.List
 import           Data.Text                      ( Text )
 import           Data.String.QM
+import           Data.Either.Combinators
 
 import           Control.Arrow
 import           Control.Composition
@@ -24,7 +25,7 @@ pictures =
   ]
 
 pictureTags :: [UUID] -> [PictureTagInput]
-pictureTags uuids = zip uuids [["a", "b"], ["a'"], ["c"]]
+pictureTags uuids = zip uuids [["a", "b", "d"], ["a'", "d"], ["c", "d"], ["d"]]
 
 tagAliases :: [TagAliasInput]
 tagAliases = [("a", "a'")]
@@ -40,39 +41,74 @@ hook :: ((Connection, [UUID]) -> IO ()) -> IO ()
 hook = bracket (openConnection >>= setupFixtures)
                ((cleanupDB >=> closeConnection) <<< fst)
 
+-- Helpers
+----------------------------------------------------------------------
+
+mapIds :: Either a [Picture] -> [UUID]
+mapIds = (map uuid) . (fromRight [])
+
 -- Tests
 ----------------------------------------------------------------------
 
 spec :: Spec
 spec = around hook $ do
-  describe "Model.Picture" $ do
-    describe "getByUuid" $ do
-      it "returns one picture with valid uuid" $ \(conn, (actual_uuid : _)) ->
-        do
-          getByUuid actual_uuid conn
-            >>= (`shouldBeRightAnd` ((== actual_uuid) . uuid))
+  describe "getByUuid" $ do
+    it "returns one picture with valid uuid" $ \(conn, (actual_uuid : _)) -> do
+      getByUuid actual_uuid conn
+        >>= (`shouldBeRightAnd` ((== actual_uuid) . uuid))
 
-      it "returns NotFound with invalid uuid" $ \(conn, _) -> do
-        UUIDv4.nextRandom
-          >>= flip getByUuid conn
-          >>= (`shouldBeLeftAnd` (== NotFound))
+    it "returns NotFound with invalid uuid" $ \(conn, _) -> do
+      UUIDv4.nextRandom
+        >>= flip getByUuid conn
+        >>= (`shouldBeLeftAnd` (== NotFound))
 
-    describe "findByTags" $ do
-      it "queries pictures with a given tag" $ \(conn, _) -> do
-        findByTags ["a"] conn
-          >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test2.jpg"])
-                                  . sort
-                                  . map fileName
-                                  )
-              )
+  describe "findByTags" $ do
+    it "queries pictures with a given tag" $ \(conn, _) -> do
+      findByTags def { tags = ["a"] } conn
+        >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test2.jpg"])
+                                . sort
+                                . map fileName
+                                )
+            )
 
-      it "queries pictures with any of the given tag" $ \(conn, _) -> do
-        findByTags ["b", "c"] conn
-          >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test3.jpg"])
-                                  . sort
-                                  . map fileName
-                                  )
-              )
+    it "queries pictures with any of the given tag" $ \(conn, _) -> do
+      findByTags def { tags = ["b", "c"] } conn
+        >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test3.jpg"])
+                                . sort
+                                . map fileName
+                                )
+            )
+
+    it "orders results" $ \(conn, _) -> do
+      desc <- findByTags def { tags = ["a"], orderBy = FileName DESC } conn
+      asc  <- findByTags def { tags = ["a"], orderBy = FileName ASC } conn
+      (mapIds desc) `shouldBe` (reverse $ mapIds asc)
+
+    it "paginates results" $ \(conn, _) -> do
+      findByTags
+          def
+            { tags       = ["d"]
+            , pagination =
+              Just (PaginationInput { page = Nothing, pageSize = Just 2 })
+            }
+          conn
+        >>= (`shouldBeRightAnd` ((== 2) . length))
+      findByTags
+          def
+            { tags       = ["d"]
+            , pagination =
+              Just (PaginationInput { page = Just 2, pageSize = Just 2 })
+            }
+          conn
+        >>= (`shouldBeRightAnd` ((== 1) . length))
+      findByTags
+          def
+            { tags       = ["d"]
+            , pagination =
+              Just (PaginationInput { page = Just 3, pageSize = Just 2 })
+            }
+          conn
+        >>= (`shouldBeRightAnd` ((== 0) . length))
 
 main :: IO ()
 main = hspec $ spec

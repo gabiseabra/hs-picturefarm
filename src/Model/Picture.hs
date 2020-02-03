@@ -1,14 +1,21 @@
 module Model.Picture
-  ( RecordError(..)
+  ( module Defaults
+  , module Model.Pagination
+  , RecordError(..)
   , Picture(..)
+  , OrderBy(..)
+  , Order(..)
+  , FindByTagsInput(..)
   , getByUuid
   , findByTags )
 where
 
+import           Defaults
 import           Model
+import           Model.Pagination
 
 import           Control.Monad
-import           Control.Applicative
+import           Control.Applicative (empty)
 
 import           Data.Aeson
 import           Data.Maybe
@@ -16,8 +23,14 @@ import           Data.Text (Text)
 import           Data.UUID
 import           Data.String.QM
 
-import qualified Database.PostgreSQL.Simple            as PG
-import qualified Database.PostgreSQL.Simple.TypedQuery as TQ
+import           Data.ByteString.Builder        ( string8 )
+
+import qualified Database.PostgreSQL.Simple    as PG
+import Database.PostgreSQL.Simple.ToField (Action(..), ToField(..))
+import Database.PostgreSQL.Simple.TypedQuery (genJsonQuery)
+
+-- Schema
+----------------------------------------------------------------------
 
 data Picture = Picture {
   uuid     :: UUID,
@@ -40,12 +53,33 @@ instance FromJSON Picture where
 
   parseJSON _ = empty
 
+-- Input types
+----------------------------------------------------------------------
+
+data Order = ASC | DESC deriving Show
+data OrderBy = UpdatedAt Order | FileName Order | Random
+
+instance ToField OrderBy where
+  toField (UpdatedAt ord) = Plain $ string8 $ "updated_at " <> show ord
+  toField (FileName ord)  = Plain $ string8 $ "file_name " <> show ord
+  toField Random          = Plain $ string8 "random()"
+
+data FindByTagsInput = FindByTagsInput {
+  tags :: [Text],
+  orderBy :: OrderBy,
+  pagination :: Maybe PaginationInput
+}
+
+instance Defaults FindByTagsInput where
+  def = FindByTagsInput [] (UpdatedAt DESC) Nothing
+
 -- Queries
 ----------------------------------------------------------------------
 
+-- | Returns one picture by uuid
 getByUuid :: UUID -> PG.Connection -> IO (Either RecordError Picture)
 getByUuid uuid conn = do
-  $(TQ.genJsonQuery [qq|
+  $(genJsonQuery [qq|
     select p.uuid                 as uuid        -- UUID
          , p.file_name            as file_name   -- Text
          , p.url                  as url         -- Text
@@ -59,9 +93,12 @@ getByUuid uuid conn = do
     group by p.uuid
   |]) conn >>= parseOne
 
-findByTags :: [Text] -> PG.Connection -> IO (Either RecordError [Picture])
-findByTags tags conn = do
-  $(TQ.genJsonQuery [qq|
+-- | Returns a list of pictures with any of the given tags
+findByTags
+  :: FindByTagsInput -> PG.Connection -> IO (Either RecordError [Picture])
+findByTags FindByTagsInput{..} conn =
+  let PaginationParams {..} = parsePaginationInput pagination
+  in $(genJsonQuery [qq|
     select p.uuid                 as uuid        -- UUID
          , p.file_name            as file_name   -- Text
          , p.url                  as url         -- Text
@@ -85,4 +122,7 @@ findByTags tags conn = do
       )
     )
     group by p.uuid
+    order by ?                                   -- < orderBy
+    limit ?                                      -- < limit
+    offset ?                                     -- < offset
   |]) conn >>= parseMany
