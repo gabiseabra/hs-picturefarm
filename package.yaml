@@ -53,6 +53,8 @@ dependencies:
 - morpheus-graphql
 - http-types
 - scotty
+- wai
+- warp
 
 library:
   source-dirs: src
