@@ -9,7 +9,7 @@ where
 
 import qualified Model.Picture                 as DB
 import           Model                          ( RecordError )
-import           Env                 ( Connection )
+import           Env                            ( Connection )
 
 import           GHC.Generics
 
@@ -48,4 +48,4 @@ mapRecord = mapBoth show transform
 
 pictureResolver :: Connection -> PictureArgs -> IORes e Picture
 pictureResolver conn PictureArgs { uuid } =
-  liftEither . liftM mapRecord $ DB.getByUuid uuid conn
+  liftEither . liftM mapRecord $ DB.getByUUID uuid conn

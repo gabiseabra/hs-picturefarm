@@ -5,8 +5,10 @@ module Model.Picture
   , Picture(..)
   , OrderBy(..)
   , Order(..)
+  , IndexedField(..)
   , FindByTagsInput(..)
-  , getByUuid
+  , getByUUID
+  , getByFileName
   , findByTags )
 where
 
@@ -20,7 +22,7 @@ import           Control.Applicative (empty)
 import           Data.Aeson
 import           Data.Maybe
 import           Data.Text (Text)
-import           Data.UUID
+import           Data.UUID ( UUID )
 import           Data.String.QM
 
 import           Data.ByteString.Builder        ( string8 )
@@ -57,12 +59,23 @@ instance FromJSON Picture where
 ----------------------------------------------------------------------
 
 data Order = ASC | DESC deriving Show
-data OrderBy = UpdatedAt Order | FileName Order | Random
+
+data IndexedField = UUID | FileName | UpdatedAt
+
+instance Show IndexedField where
+  show UUID      = "uuid"
+  show FileName  = "file_name"
+  show UpdatedAt = "updated_at"
+
+instance ToField IndexedField where
+  toField = Plain . string8 . show
+
+data OrderBy = OrderBy IndexedField Order | Random
 
 instance ToField OrderBy where
-  toField (UpdatedAt ord) = Plain $ string8 $ "updated_at " <> show ord
-  toField (FileName ord)  = Plain $ string8 $ "file_name " <> show ord
-  toField Random          = Plain $ string8 "random()"
+  toField (OrderBy field ord) =
+    Plain $ string8 $ show field ++ " " ++ show ord
+  toField Random              = Plain $ string8 "random()"
 
 data FindByTagsInput = FindByTagsInput {
   tags :: [Text],
@@ -71,14 +84,14 @@ data FindByTagsInput = FindByTagsInput {
 }
 
 instance Defaults FindByTagsInput where
-  def = FindByTagsInput [] (UpdatedAt DESC) Nothing
+  def = FindByTagsInput [] (OrderBy UpdatedAt DESC) Nothing
 
 -- Queries
 ----------------------------------------------------------------------
 
--- | Returns one picture by uuid
-getByUuid :: UUID -> PG.Connection -> IO (Either RecordError Picture)
-getByUuid uuid conn = do
+-- | Returns one picture
+getBy :: (ToField a) => IndexedField -> a -> PG.Connection -> IO (Either RecordError Picture)
+getBy field value conn = do
   $(genJsonQuery [qq|
     select p.uuid                 as uuid        -- UUID
          , p.file_name            as file_name   -- Text
@@ -89,9 +102,16 @@ getByUuid uuid conn = do
     from pictures p
     left join picture_tags pt
       on pt.picture_uuid = p.uuid
-    where p.uuid = ?                             -- < uuid
+    where p.?                                    -- < field
+          = ?                                    -- < value
     group by p.uuid
   |]) conn >>= parseOne
+
+getByUUID :: UUID -> PG.Connection -> IO (Either RecordError Picture)
+getByUUID = getBy UUID
+
+getByFileName :: Text -> PG.Connection -> IO (Either RecordError Picture)
+getByFileName = getBy FileName
 
 -- | Returns a list of pictures with any of the given tags
 findByTags

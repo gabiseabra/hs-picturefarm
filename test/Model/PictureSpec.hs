@@ -52,14 +52,14 @@ mapIds = (map uuid) . (fromRight [])
 
 spec :: Spec
 spec = around hook $ do
-  describe "getByUuid" $ do
+  describe "getByUUID" $ do
     it "returns one picture with valid uuid" $ \(conn, (actual_uuid : _)) -> do
-      getByUuid actual_uuid conn
+      getByUUID actual_uuid conn
         >>= (`shouldBeRightAnd` ((== actual_uuid) . uuid))
 
     it "returns NotFound with invalid uuid" $ \(conn, _) -> do
       UUIDv4.nextRandom
-        >>= flip getByUuid conn
+        >>= flip getByUUID conn
         >>= (`shouldBeLeftAnd` (== NotFound))
 
   describe "findByTags" $ do
@@ -80,8 +80,10 @@ spec = around hook $ do
             )
 
     it "orders results" $ \(conn, _) -> do
-      desc <- findByTags def { tags = ["a"], orderBy = FileName DESC } conn
-      asc  <- findByTags def { tags = ["a"], orderBy = FileName ASC } conn
+      desc <- findByTags def { tags = ["a"], orderBy = OrderBy FileName DESC }
+                         conn
+      asc <- findByTags def { tags = ["a"], orderBy = OrderBy FileName ASC }
+                        conn
       (mapIds desc) `shouldBe` (reverse $ mapIds asc)
 
     it "paginates results" $ \(conn, _) -> do
