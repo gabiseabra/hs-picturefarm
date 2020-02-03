@@ -17,6 +17,7 @@ import           Database.PostgreSQL.Simple
 import qualified Data.Text                     as T
 import qualified Data.ByteString.Char8         as B
 import qualified Crypto.Hash.MD5               as MD5
+import           Data.String.Conversions
 
 import           Database.PostgreSQL.Simple
 import           Database.PostgreSQL.Simple.SqlQQ
@@ -28,4 +29,4 @@ closeConnection :: Connection -> IO ()
 closeConnection conn = close conn
 
 md5 :: String -> T.Text
-md5 a = T.pack $ B.unpack $ MD5.hash $ B.pack a
+md5 a = cs $ B.unpack $ MD5.hash $ B.pack a

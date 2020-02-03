@@ -2,7 +2,6 @@ module Model.PictureSpec where
 
 import           Spec.ModelCase
 
-import           Model.Pagination
 import           Model.Picture
 
 import           Data.UUID
@@ -10,6 +9,7 @@ import qualified Data.UUID.V4                  as UUIDv4
 import           Data.List
 import           Data.Text                      ( Text )
 import           Data.String.QM
+import           Data.Either.Combinators
 
 import           Control.Arrow
 import           Control.Composition
@@ -40,6 +40,12 @@ setupFixtures conn = do
 hook :: ((Connection, [UUID]) -> IO ()) -> IO ()
 hook = bracket (openConnection >>= setupFixtures)
                ((cleanupDB >=> closeConnection) <<< fst)
+
+-- Helpers
+----------------------------------------------------------------------
+
+mapIds :: Either a [Picture] -> [UUID]
+mapIds = (map uuid) . (fromRight [])
 
 -- Tests
 ----------------------------------------------------------------------
@@ -72,6 +78,11 @@ spec = around hook $ do
                                 . map fileName
                                 )
             )
+
+    it "orders results" $ \(conn, _) -> do
+      desc <- findByTags def { tags = ["a"], orderBy = FileName DESC } conn
+      asc  <- findByTags def { tags = ["a"], orderBy = FileName ASC } conn
+      (mapIds desc) `shouldBe` (reverse $ mapIds asc)
 
     it "paginates results" $ \(conn, _) -> do
       findByTags

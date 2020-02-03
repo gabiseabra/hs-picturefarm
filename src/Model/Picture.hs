@@ -1,5 +1,6 @@
 module Model.Picture
   ( module Defaults
+  , module Model.Pagination
   , RecordError(..)
   , Picture(..)
   , OrderBy(..)
@@ -56,11 +57,12 @@ instance FromJSON Picture where
 ----------------------------------------------------------------------
 
 data Order = ASC | DESC deriving Show
-data OrderBy = UpdatedAt Order | Random
+data OrderBy = UpdatedAt Order | FileName Order | Random
 
 instance ToField OrderBy where
   toField (UpdatedAt ord) = Plain $ string8 $ "updated_at " <> show ord
-  toField Random    = Plain $ string8 "random()"
+  toField (FileName ord)  = Plain $ string8 $ "file_name " <> show ord
+  toField Random          = Plain $ string8 "random()"
 
 data FindByTagsInput = FindByTagsInput {
   tags :: [Text],
