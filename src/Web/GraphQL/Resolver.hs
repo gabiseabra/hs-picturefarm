@@ -15,7 +15,7 @@ import           Web.GraphQL.Types
 import           Web.GraphQL.Resolver.Pictures
 
 data Query m = Query
-  { picture :: PictureArgs -> m Picture
+  { picture :: PictureArgs -> m (Maybe Picture)
   } deriving (Generic, GQLType)
 
 rootResolver :: Connection -> GQLRootResolver IO () Query Undefined Undefined

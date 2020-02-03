@@ -41,7 +41,7 @@ data Picture = Picture {
   url      :: Text,
   mimeType :: Text,
   tags     :: [Text]
-} deriving (Show)
+} deriving (Show, Eq)
 
 instance FromJSON Picture where
   parseJSON (Object v) = do
@@ -90,7 +90,7 @@ instance Defaults FindByTagsInput where
 ----------------------------------------------------------------------
 
 -- | Returns one picture
-getBy :: (ToField a) => IndexedField -> a -> PG.Connection -> IO (Either RecordError Picture)
+getBy :: (ToField a) => IndexedField -> a -> PG.Connection -> IO (Either RecordError (Maybe Picture))
 getBy field value conn = do
   $(genJsonQuery [qq|
     select p.uuid                 as uuid        -- UUID
@@ -107,10 +107,10 @@ getBy field value conn = do
     group by p.uuid
   |]) conn >>= parseOne
 
-getByUUID :: UUID -> PG.Connection -> IO (Either RecordError Picture)
+getByUUID :: UUID -> PG.Connection -> IO (Either RecordError (Maybe Picture))
 getByUUID = getBy UUID
 
-getByFileName :: Text -> PG.Connection -> IO (Either RecordError Picture)
+getByFileName :: Text -> PG.Connection -> IO (Either RecordError (Maybe Picture))
 getByFileName = getBy FileName
 
 -- | Returns a list of pictures with any of the given tags

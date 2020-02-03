@@ -11,6 +11,7 @@ import           Data.Text                      ( Text )
 import           Data.String.QM
 import           Data.Either.Combinators
 
+import           Control.Monad
 import           Control.Arrow
 import           Control.Composition
 
@@ -55,12 +56,12 @@ spec = setup $ do
   describe "getByUUID" $ do
     it "returns one picture with valid uuid" $ \(conn, (actual_uuid : _)) -> do
       getByUUID actual_uuid conn
-        >>= (`shouldBeRightAnd` ((== actual_uuid) . uuid))
+        >>= (`shouldBeRightAnd` ((== Just actual_uuid) . liftM uuid))
 
     it "returns NotFound with invalid uuid" $ \(conn, _) -> do
       UUIDv4.nextRandom
         >>= flip getByUUID conn
-        >>= (`shouldBeLeftAnd` (== NotFound))
+        >>= (`shouldBeRightAnd` (== Nothing))
 
   describe "findByTags" $ do
     it "queries pictures with a given tag" $ \(conn, _) -> do

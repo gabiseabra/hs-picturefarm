@@ -34,12 +34,12 @@ instance (FromField a, Typeable a) => FromField [a] where
 -- Model helpers
 ----------------------------------------------------------------------
 
-data RecordError = NotFound | ParseError String deriving (Show, Eq)
+data RecordError = RecordError String deriving (Show, Eq)
 
-parseOne :: (FromJSON a) => [Value] -> IO (Either RecordError a)
-parseOne [] = return $ Left NotFound
+parseOne :: (FromJSON a) => [Value] -> IO (Either RecordError (Maybe a))
+parseOne [] = return $ Right Nothing
 parseOne (record : _) =
-  return . mapLeft ParseError . parseEither parseJSON $ record
+  return . mapBoth RecordError Just . parseEither parseJSON $ record
 
 parseMany :: (FromJSON a) => [Value] -> IO (Either RecordError [a])
-parseMany = return . mapLeft ParseError . mapM (parseEither parseJSON)
+parseMany = return . mapLeft RecordError . mapM (parseEither parseJSON)

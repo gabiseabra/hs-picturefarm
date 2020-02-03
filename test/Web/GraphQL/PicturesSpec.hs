@@ -48,7 +48,7 @@ picturesQuery = [qq|
 spec :: Spec
 spec = setup $ do
   describe "picture" $ do
-    it "returns a picture" $ do
+    it "returns a picture with a valid file name" $ do
       postGQL picturesQuery [json|{fileName: "test1.jpg"}|]
         `shouldRespondWith` [json|{
               data: {
@@ -59,6 +59,10 @@ spec = setup $ do
                 }
               }
             }|]
+
+    it "returns null with an invalid file name" $ do
+      postGQL picturesQuery [json|{fileName: "test0.jpg"}|]
+        `shouldRespondWith` [json|{data: {picture: null}}|]
 
 main :: IO ()
 main = hspec $ spec
