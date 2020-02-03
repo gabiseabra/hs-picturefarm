@@ -1,6 +1,6 @@
 module Main where
 
-import qualified Application                   as App
+import qualified Web                           as Web
 
 main :: IO ()
-main = App.main
+main = Web.main

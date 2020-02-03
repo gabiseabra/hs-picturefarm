@@ -1,10 +1,10 @@
-module GraphQL
+module Web.GraphQL
   ( api
   )
 where
 
 import           Env                            ( Connection )
-import           GraphQL.Resolver               ( rootResolver )
+import           Web.GraphQL.Resolver           ( rootResolver )
 
 import           Data.Morpheus                  ( interpreter )
 import           Data.ByteString.Lazy.Char8     ( ByteString )

@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveAnyClass #-}
 
-module GraphQL.Resolver
+module Web.GraphQL.Resolver
   ( rootResolver
   )
 where
@@ -11,11 +11,11 @@ import           GHC.Generics
 
 import           Data.Morpheus.Types
 
-import           GraphQL.Types
-import           GraphQL.Resolver.Pictures
+import           Web.GraphQL.Types
+import           Web.GraphQL.Resolver.Pictures
 
 data Query m = Query
-  { picture :: PictureArgs -> m Picture
+  { picture :: PictureArgs -> m (Maybe Picture)
   } deriving (Generic, GQLType)
 
 rootResolver :: Connection -> GQLRootResolver IO () Query Undefined Undefined

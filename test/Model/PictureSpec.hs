@@ -11,6 +11,7 @@ import           Data.Text                      ( Text )
 import           Data.String.QM
 import           Data.Either.Combinators
 
+import           Control.Monad
 import           Control.Arrow
 import           Control.Composition
 
@@ -25,7 +26,7 @@ pictures =
   ]
 
 pictureTags :: [UUID] -> [PictureTagInput]
-pictureTags uuids = zip uuids [["a", "b", "d"], ["a'", "d"], ["c", "d"], ["d"]]
+pictureTags uuids = zip uuids [["a", "b", "d"], ["a'", "d"], ["c", "d"]]
 
 tagAliases :: [TagAliasInput]
 tagAliases = [("a", "a'")]
@@ -37,9 +38,9 @@ setupFixtures conn = do
   _     <- insertTagAliases conn tagAliases
   return (conn, uuids)
 
-hook :: ((Connection, [UUID]) -> IO ()) -> IO ()
-hook = bracket (openConnection >>= setupFixtures)
-               ((cleanupDB >=> closeConnection) <<< fst)
+setup :: SpecWith (Connection, [UUID]) -> Spec
+setup = around $ bracket (openConnection >>= setupFixtures)
+                         ((cleanupDB >=> closeConnection) <<< fst)
 
 -- Helpers
 ----------------------------------------------------------------------
@@ -51,16 +52,16 @@ mapIds = (map uuid) . (fromRight [])
 ----------------------------------------------------------------------
 
 spec :: Spec
-spec = around hook $ do
-  describe "getByUuid" $ do
+spec = setup $ do
+  describe "getByUUID" $ do
     it "returns one picture with valid uuid" $ \(conn, (actual_uuid : _)) -> do
-      getByUuid actual_uuid conn
-        >>= (`shouldBeRightAnd` ((== actual_uuid) . uuid))
+      getByUUID actual_uuid conn
+        >>= (`shouldBeRightAnd` ((== Just actual_uuid) . liftM uuid))
 
     it "returns NotFound with invalid uuid" $ \(conn, _) -> do
       UUIDv4.nextRandom
-        >>= flip getByUuid conn
-        >>= (`shouldBeLeftAnd` (== NotFound))
+        >>= flip getByUUID conn
+        >>= (`shouldBeRightAnd` (== Nothing))
 
   describe "findByTags" $ do
     it "queries pictures with a given tag" $ \(conn, _) -> do
@@ -80,8 +81,10 @@ spec = around hook $ do
             )
 
     it "orders results" $ \(conn, _) -> do
-      desc <- findByTags def { tags = ["a"], orderBy = FileName DESC } conn
-      asc  <- findByTags def { tags = ["a"], orderBy = FileName ASC } conn
+      desc <- findByTags def { tags = ["a"], orderBy = OrderBy FileName DESC }
+                         conn
+      asc <- findByTags def { tags = ["a"], orderBy = OrderBy FileName ASC }
+                        conn
       (mapIds desc) `shouldBe` (reverse $ mapIds asc)
 
     it "paginates results" $ \(conn, _) -> do

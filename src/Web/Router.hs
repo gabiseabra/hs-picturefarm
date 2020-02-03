@@ -1,30 +1,41 @@
-module Application
-  ( main
+module Web.Router
+  ( router
+  , application
   )
 where
 
 import           Env
-import           GraphQL
+import qualified Web.GraphQL                   as GQL
 
 import           Control.Arrow
 import           Control.Applicative
 import           Control.Monad.IO.Class         ( liftIO )
-import           Control.Monad.Trans.Except
 import           Control.Monad.Reader           ( lift
                                                 , asks
                                                 )
 
 import           Data.Text.Lazy                 ( Text )
-import           Data.Pool                      ( withResource )
 
+import           Network.Wai                    ( Application )
 import           Network.HTTP.Types
 import           Web.Scotty.Trans
 
-main :: IO ()
-main = initialize >>= runServer
+-- Helpers
+----------------------------------------------------------------------
 
-application :: ScottyT Text EnvM ()
-application = do
+sendError :: (ScottyError e, Monad m) => Status -> ActionT e m ()
+sendError s = status s >> sendErrorMessage s
+
+sendErrorMessage (status404) = text "Not found"
+
+-- Routes
+----------------------------------------------------------------------
+
+application :: AppContext -> IO Application
+application ctx@(_, config, _) = scottyAppT (runEnvIO ctx) router
+
+router :: ScottyT Text EnvM ()
+router = do
   get "/api" $ do
     env <- lift $ asks environment
     case env of
@@ -32,20 +43,10 @@ application = do
       _               -> file "public/playground.html"
 
   post "/api" $ do
-    response    <- api <$> (lift $ asks conn) <*> body
+    response    <- GQL.api <$> (lift $ asks conn) <*> body
     rawResponse <- liftIO response
     setHeader "Content-Type" "application/json; charset=utf-8"
     status status200
     raw rawResponse
 
   notFound $ sendError status404
-
-runServer :: AppContext -> IO ()
-runServer ctx@(_, config, _) = scottyT (port config) (runEnvIO ctx) application
-
-----------------------------------------------------------------------
-
-sendError :: (ScottyError e, Monad m) => Status -> ActionT e m ()
-sendError s = status s >> sendErrorMessage s
-
-sendErrorMessage (status404) = text "Not found"
