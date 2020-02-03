@@ -58,7 +58,7 @@ spec = around hook $ do
 
   describe "findByTags" $ do
     it "queries pictures with a given tag" $ \(conn, _) -> do
-      findByTags (["a"], Nothing, UpdatedAt) conn
+      findByTags def { tags = ["a"] } conn
         >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test2.jpg"])
                                 . sort
                                 . map fileName
@@ -66,7 +66,7 @@ spec = around hook $ do
             )
 
     it "queries pictures with any of the given tag" $ \(conn, _) -> do
-      findByTags (["b", "c"], Nothing, UpdatedAt) conn
+      findByTags def { tags = ["b", "c"] } conn
         >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test3.jpg"])
                                 . sort
                                 . map fileName
@@ -75,24 +75,27 @@ spec = around hook $ do
 
     it "paginates results" $ \(conn, _) -> do
       findByTags
-          ( ["d"]
-          , Just (PaginationInput { page = Nothing, pageSize = Just 2 })
-          , UpdatedAt
-          )
+          def
+            { tags       = ["d"]
+            , pagination =
+              Just (PaginationInput { page = Nothing, pageSize = Just 2 })
+            }
           conn
         >>= (`shouldBeRightAnd` ((== 2) . length))
       findByTags
-          ( ["d"]
-          , Just (PaginationInput { page = Just 2, pageSize = Just 2 })
-          , UpdatedAt
-          )
+          def
+            { tags       = ["d"]
+            , pagination =
+              Just (PaginationInput { page = Just 2, pageSize = Just 2 })
+            }
           conn
         >>= (`shouldBeRightAnd` ((== 1) . length))
       findByTags
-          ( ["d"]
-          , Just (PaginationInput { page = Just 3, pageSize = Just 2 })
-          , UpdatedAt
-          )
+          def
+            { tags       = ["d"]
+            , pagination =
+              Just (PaginationInput { page = Just 3, pageSize = Just 2 })
+            }
           conn
         >>= (`shouldBeRightAnd` ((== 0) . length))
 

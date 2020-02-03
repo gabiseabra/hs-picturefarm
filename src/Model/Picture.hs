@@ -1,11 +1,15 @@
 module Model.Picture
-  ( RecordError(..)
+  ( module Defaults
+  , RecordError(..)
   , Picture(..)
   , OrderBy(..)
+  , Order(..)
+  , FindByTagsInput(..)
   , getByUuid
   , findByTags )
 where
 
+import           Defaults
 import           Model
 import           Model.Pagination
 
@@ -48,15 +52,29 @@ instance FromJSON Picture where
 
   parseJSON _ = empty
 
+-- Input types
+----------------------------------------------------------------------
+
+data Order = ASC | DESC deriving Show
+data OrderBy = UpdatedAt Order | Random
+
+instance ToField OrderBy where
+  toField (UpdatedAt ord) = Plain $ string8 $ "updated_at " <> show ord
+  toField Random    = Plain $ string8 "random()"
+
+data FindByTagsInput = FindByTagsInput {
+  tags :: [Text],
+  orderBy :: OrderBy,
+  pagination :: Maybe PaginationInput
+}
+
+instance Defaults FindByTagsInput where
+  def = FindByTagsInput [] (UpdatedAt DESC) Nothing
+
 -- Queries
 ----------------------------------------------------------------------
 
-data OrderBy = UpdatedAt | Random
-
-instance ToField OrderBy where
-  toField UpdatedAt = Plain $ string8 "updated_at"
-  toField Random    = Plain $ string8 "random()"
-
+-- | Returns one picture by uuid
 getByUuid :: UUID -> PG.Connection -> IO (Either RecordError Picture)
 getByUuid uuid conn = do
   $(genJsonQuery [qq|
@@ -73,9 +91,11 @@ getByUuid uuid conn = do
     group by p.uuid
   |]) conn >>= parseOne
 
-findByTags :: ([Text], Maybe PaginationInput, OrderBy) -> PG.Connection -> IO (Either RecordError [Picture])
-findByTags (tags, pgn, orderBy) conn =
-  let PaginationParams {..} = parsePaginationInput pgn
+-- | Returns a list of pictures with any of the given tags
+findByTags
+  :: FindByTagsInput -> PG.Connection -> IO (Either RecordError [Picture])
+findByTags FindByTagsInput{..} conn =
+  let PaginationParams {..} = parsePaginationInput pagination
   in $(genJsonQuery [qq|
     select p.uuid                 as uuid        -- UUID
          , p.file_name            as file_name   -- Text
@@ -101,7 +121,6 @@ findByTags (tags, pgn, orderBy) conn =
     )
     group by p.uuid
     order by ?                                   -- < orderBy
-      desc
     limit ?                                      -- < limit
     offset ?                                     -- < offset
   |]) conn >>= parseMany
