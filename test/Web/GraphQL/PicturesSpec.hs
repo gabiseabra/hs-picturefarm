@@ -21,14 +21,15 @@ pictures =
 pictureTags :: [UUID] -> [PictureTagInput]
 pictureTags uuids = zip uuids [["a", "b"], ["a"], ["b"]]
 
-setupFixtures :: IO ()
-setupFixtures = withConnection $ \conn -> do
+setupFixtures :: Connection -> IO Connection
+setupFixtures conn = do
   uuids <- insertPictures conn pictures
   _     <- insertPictureTags conn $ pictureTags uuids
-  return ()
+  return conn
 
-setup :: SpecWith ((), Application) -> Spec
-setup = withApplication setupFixtures
+setup :: SpecWith (Connection, Application) -> Spec
+setup = aroundApplication
+  $ bracket (openConnection >>= setupFixtures) (cleanupDB >=> closeConnection)
 
 -- Queries
 ----------------------------------------------------------------------
@@ -73,7 +74,7 @@ spec = setup $ do
         `shouldRespondWith` [json|{data: {picture: null}}|]
 
   describe "pictures" $ do
-    xit "returns a list of pictures with a given tag" $ do
+    it "returns a list of pictures with a given tag" $ do
       postGQL picturesQuery [json|{tags: ["a"]}|] `shouldRespondWith` [json|{
               data: {
                 pictures: [
@@ -108,5 +109,6 @@ spec = setup $ do
                 ]
               }
             }|]
+
 main :: IO ()
 main = hspec $ spec

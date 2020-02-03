@@ -7,7 +7,7 @@ module Spec.WebCase
   , postGQL
   , setupApplication
   , withApplication
-  -- , aroundApplication
+  , aroundApplication
   )
 where
 
@@ -29,6 +29,7 @@ import           Data.ByteString.Lazy           ( ByteString )
 import           Data.String.Conversions        ( cs )
 
 import           Control.Concurrent.Async       ( concurrently )
+import           Control.Monad.IO.Class         ( liftIO )
 
 import           Network.Wai                    ( Application )
 import           Network.Wai.Test               ( SResponse )
@@ -46,11 +47,12 @@ statefulApplication = flip concurrently $ setupApplication
 
 withApplication :: IO st -> SpecWith (st, Application) -> Spec
 withApplication = withState . statefulApplication
-{-
+
 aroundApplication
   :: (ActionWith st -> IO ()) -> SpecWith (st, Application) -> Spec
-aroundApplication action = around $ \a -> action $ \st -> a $ st
--}
+aroundApplication action = around $ \inner -> do
+  action $ \st -> (statefulApplication $ pure st) >>= inner
+
 buildGraphQLRequest :: ByteString -> ByteString -> ByteString
 buildGraphQLRequest query variables =
   let variables' = cs variables
