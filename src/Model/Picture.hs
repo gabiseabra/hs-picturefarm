@@ -1,6 +1,7 @@
 module Model.Picture
   ( RecordError(..)
   , Picture(..)
+  , OrderBy(..)
   , getByUuid
   , findByTags )
 where
@@ -17,8 +18,14 @@ import           Data.Text (Text)
 import           Data.UUID
 import           Data.String.QM
 
-import qualified Database.PostgreSQL.Simple            as PG
+import           Data.ByteString.Builder        ( string8 )
+
+import qualified Database.PostgreSQL.Simple    as PG
+import Database.PostgreSQL.Simple.ToField (Action(..), ToField(..))
 import Database.PostgreSQL.Simple.TypedQuery (genJsonQuery)
+
+-- Schema
+----------------------------------------------------------------------
 
 data Picture = Picture {
   uuid     :: UUID,
@@ -44,6 +51,12 @@ instance FromJSON Picture where
 -- Queries
 ----------------------------------------------------------------------
 
+data OrderBy = UpdatedAt | Random
+
+instance ToField OrderBy where
+  toField UpdatedAt = Plain $ string8 "updated_at"
+  toField Random    = Plain $ string8 "random()"
+
 getByUuid :: UUID -> PG.Connection -> IO (Either RecordError Picture)
 getByUuid uuid conn = do
   $(genJsonQuery [qq|
@@ -60,8 +73,8 @@ getByUuid uuid conn = do
     group by p.uuid
   |]) conn >>= parseOne
 
-findByTags :: ([Text], Maybe PaginationInput) -> PG.Connection -> IO (Either RecordError [Picture])
-findByTags (tags, pgn) conn =
+findByTags :: ([Text], Maybe PaginationInput, OrderBy) -> PG.Connection -> IO (Either RecordError [Picture])
+findByTags (tags, pgn, orderBy) conn =
   let PaginationParams {..} = parsePaginationInput pgn
   in $(genJsonQuery [qq|
     select p.uuid                 as uuid        -- UUID
@@ -87,7 +100,8 @@ findByTags (tags, pgn) conn =
       )
     )
     group by p.uuid
-    order by updated_at desc
+    order by ?                                   -- < orderBy
+      desc
     limit ?                                      -- < limit
     offset ?                                     -- < offset
   |]) conn >>= parseMany

@@ -12,7 +12,6 @@ import           Data.String.QM
 
 import           Database.PostgreSQL.Simple.TypedQuery
 
-
 -- Schema
 ----------------------------------------------------------------------
 
