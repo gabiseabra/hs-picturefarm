@@ -33,6 +33,7 @@ import Database.PostgreSQL.Simple.TypedQuery (genJsonQuery)
 ----------------------------------------------------------------------
 
 data Picture = Picture {
+  id       :: Int,
   uuid     :: UUID,
   fileName :: Text,
   fileHash :: Text,
@@ -43,13 +44,14 @@ data Picture = Picture {
 
 instance FromJSON Picture where
   parseJSON (Object v) = do
+    id      <-  v .: "id"
     uuid      <-  v .: "uuid"
     fileName  <-  v .: "file_name"
     fileHash  <-  v .: "file_hash"
     url       <-  v .: "url"
     mimeType  <-  v .: "mime_type"
     tags      <-  v .: "tags"
-    return (Picture uuid fileName fileHash url mimeType tags)
+    return (Picture id uuid fileName fileHash url mimeType tags)
 
   parseJSON _ = empty
 
@@ -58,12 +60,12 @@ instance FromJSON Picture where
 
 data Order = ASC | DESC deriving Show
 
-data IndexedField = UUID | FileName | UpdatedAt
+data IndexedField = ID | UUID | FileName
 
 instance Show IndexedField where
+  show ID        = "id"
   show UUID      = "uuid"
   show FileName  = "file_name"
-  show UpdatedAt = "updated_at"
 
 instance ToField IndexedField where
   toField = Plain . string8 . show
@@ -82,7 +84,7 @@ data FindByTagsInput = FindByTagsInput {
 }
 
 instance Defaults FindByTagsInput where
-  def = FindByTagsInput [] (OrderBy UpdatedAt DESC) Nothing
+  def = FindByTagsInput [] (OrderBy ID DESC) Nothing
 
 -- Queries
 ----------------------------------------------------------------------
@@ -91,7 +93,8 @@ instance Defaults FindByTagsInput where
 getBy :: (ToField a) => IndexedField -> a -> PG.Connection -> IO (Either RecordError (Maybe Picture))
 getBy field value conn = do
   $(genJsonQuery [qq|
-    select p.uuid                 as uuid        -- UUID
+    select p.id                   as id          -- Int
+         , p.uuid                 as uuid        -- UUID
          , p.file_name            as file_name   -- Text
          , p.url                  as url         -- Text
          , p.mime_type            as mime_type   -- Text
@@ -102,7 +105,7 @@ getBy field value conn = do
       on pt.picture_uuid = p.uuid
     where p.?                                    -- < field
           = ?                                    -- < value
-    group by p.uuid
+    group by p.id
   |]) conn >>= parseOne
 
 getByUUID :: UUID -> PG.Connection -> IO (Either RecordError (Maybe Picture))
@@ -117,7 +120,8 @@ findByTags
 findByTags FindByTagsInput{..} conn =
   let PaginationParams {..} = parsePaginationInput pagination
   in $(genJsonQuery [qq|
-    select p.uuid                 as uuid          -- UUID
+    select p.id                   as id            -- Int
+         , p.uuid                 as uuid          -- UUID
          , p.file_name            as file_name     -- Text
          , p.url                  as url           -- Text
          , p.mime_type            as mime_type     -- Text
@@ -141,7 +145,7 @@ findByTags FindByTagsInput{..} conn =
           ?                                        -- < tags
         )
       )
-    group by p.uuid
+    group by p.id
     order by ?                                     -- < orderBy
     limit ?                                        -- < limit
     offset ?                                       -- < offset

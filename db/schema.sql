@@ -55,6 +55,7 @@ CREATE TABLE public.picture_tags (
 --
 
 CREATE TABLE public.pictures (
+    id integer NOT NULL,
     uuid uuid DEFAULT public.uuid_generate_v4() NOT NULL,
     file_name character varying NOT NULL,
     file_hash character(32) NOT NULL,
@@ -63,6 +64,26 @@ CREATE TABLE public.pictures (
     created_at timestamp(6) without time zone DEFAULT now() NOT NULL,
     updated_at timestamp(6) without time zone DEFAULT now() NOT NULL
 );
+
+
+--
+-- Name: pictures_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.pictures_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pictures_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.pictures_id_seq OWNED BY public.pictures.id;
 
 
 --
@@ -87,6 +108,13 @@ CREATE TABLE public.tag_aliases (
 
 
 --
+-- Name: pictures id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.pictures ALTER COLUMN id SET DEFAULT nextval('public.pictures_id_seq'::regclass);
+
+
+--
 -- Name: picture_tags picture_tags_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -99,7 +127,15 @@ ALTER TABLE ONLY public.picture_tags
 --
 
 ALTER TABLE ONLY public.pictures
-    ADD CONSTRAINT pictures_pkey PRIMARY KEY (uuid);
+    ADD CONSTRAINT pictures_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pictures pictures_uuid_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.pictures
+    ADD CONSTRAINT pictures_uuid_key UNIQUE (uuid);
 
 
 --
@@ -119,10 +155,10 @@ ALTER TABLE ONLY public.tag_aliases
 
 
 --
--- Name: pictures_updated_at_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: pictures_file_name_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX pictures_updated_at_idx ON public.pictures USING btree (updated_at DESC);
+CREATE INDEX pictures_file_name_idx ON public.pictures USING btree (file_name);
 
 
 --

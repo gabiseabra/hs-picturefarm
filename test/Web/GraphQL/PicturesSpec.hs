@@ -78,14 +78,8 @@ spec = setup $ do
       postGQL picturesQuery [json|{tags: ["a"]}|] `shouldRespondWith` [json|{
               data: {
                 pictures: [
-                  {
-                    fileName: "test1.jpg",
-                    tags: ["a", "b"]
-                  },
-                  {
-                    fileName: "test2.jpg",
-                    tags: ["a"]
-                  }
+                  {fileName: "test2.jpg", tags: ["a"]},
+                  {fileName: "test1.jpg", tags: ["a", "b"]}
                 ]
               }
             }|]
@@ -94,18 +88,9 @@ spec = setup $ do
       postGQL picturesQuery [json|{tags: []}|] `shouldRespondWith` [json|{
               data: {
                 pictures: [
-                  {
-                    fileName: "test1.jpg",
-                    tags: ["a", "b"]
-                  },
-                  {
-                    fileName: "test2.jpg",
-                    tags: ["a"]
-                  },
-                  {
-                    fileName: "test2.jpg",
-                    tags: ["b"]
-                  }
+                  {fileName: "test3.jpg", tags: ["b"]},
+                  {fileName: "test2.jpg", tags: ["a"]},
+                  {fileName: "test1.jpg", tags: ["a", "b"]}
                 ]
               }
             }|]
