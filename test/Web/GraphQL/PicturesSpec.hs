@@ -44,7 +44,7 @@ pictureQuery = [qq|
   }|]
 
 picturesQuery = [qq|
-  query pictures($tags: [String!]!, $pagination: PaginationInput) {
+  query pictures($tags: [String!], $pagination: PaginationInput) {
     pictures(tags: $tags, pagination: $pagination) {
       fileName
       tags
@@ -84,8 +84,8 @@ spec = setup $ do
               }
             }|]
 
-    xit "returns all pictures when no tags are given" $ do
-      postGQL picturesQuery [json|{tags: []}|] `shouldRespondWith` [json|{
+    it "returns all pictures when no tags are given" $ do
+      postGQL picturesQuery [json|{}|] `shouldRespondWith` [json|{
               data: {
                 pictures: [
                   {fileName: "test3.jpg", tags: ["b"]},

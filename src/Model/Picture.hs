@@ -5,8 +5,10 @@ module Model.Picture
   , Order(..)
   , IndexedField(..)
   , FindByTagsInput(..)
+  , GetAllInput(..)
   , getByUUID
   , getByFileName
+  , getAll
   , findByTags )
 where
 
@@ -44,7 +46,7 @@ data Picture = Picture {
 
 instance FromJSON Picture where
   parseJSON (Object v) = do
-    id      <-  v .: "id"
+    id        <-  v .: "id"
     uuid      <-  v .: "uuid"
     fileName  <-  v .: "file_name"
     fileHash  <-  v .: "file_hash"
@@ -55,7 +57,7 @@ instance FromJSON Picture where
 
   parseJSON _ = empty
 
--- Input types
+-- Queries
 ----------------------------------------------------------------------
 
 data Order = ASC | DESC deriving Show
@@ -63,9 +65,9 @@ data Order = ASC | DESC deriving Show
 data IndexedField = ID | UUID | FileName
 
 instance Show IndexedField where
-  show ID        = "id"
-  show UUID      = "uuid"
-  show FileName  = "file_name"
+  show ID       = "id"
+  show UUID     = "uuid"
+  show FileName = "file_name"
 
 instance ToField IndexedField where
   toField = Plain . string8 . show
@@ -73,22 +75,10 @@ instance ToField IndexedField where
 data OrderBy = OrderBy IndexedField Order | Random
 
 instance ToField OrderBy where
-  toField (OrderBy field ord) =
-    Plain $ string8 $ show field ++ " " ++ show ord
+  toField (OrderBy field ord) = Plain $ string8 $ show field ++ " " ++ show ord
   toField Random              = Plain $ string8 "random()"
 
-data FindByTagsInput = FindByTagsInput {
-  tags :: [Text],
-  orderBy :: OrderBy,
-  pagination :: Maybe PaginationInput
-}
-
-instance Defaults FindByTagsInput where
-  def = FindByTagsInput [] (OrderBy ID DESC) Nothing
-
--- Queries
 ----------------------------------------------------------------------
-
 -- | Returns one picture
 getBy :: (ToField a) => IndexedField -> a -> PG.Connection -> IO (Either RecordError (Maybe Picture))
 getBy field value conn = do
@@ -113,6 +103,48 @@ getByUUID = getBy UUID
 
 getByFileName :: Text -> PG.Connection -> IO (Either RecordError (Maybe Picture))
 getByFileName = getBy FileName
+
+----------------------------------------------------------------------
+
+data GetAllInput = GetAllInput {
+  orderBy :: OrderBy,
+  pagination :: Maybe PaginationInput
+}
+
+instance Defaults GetAllInput where
+  def = GetAllInput (OrderBy ID DESC) Nothing
+
+-- | Returns all pictures paginated with no filters
+getAll :: GetAllInput -> PG.Connection -> IO (Either RecordError [Picture])
+getAll GetAllInput{..} conn =
+  let PaginationParams {..} = parsePaginationInput pagination
+  in $(genJsonQuery [qq|
+    select p.id                   as id            -- Int
+         , p.uuid                 as uuid          -- UUID
+         , p.file_name            as file_name     -- Text
+         , p.url                  as url           -- Text
+         , p.mime_type            as mime_type     -- Text
+         , p.file_hash            as file_hash     -- Text
+         , array_agg(pts.tag)     as tags          -- [Text]
+    from pictures p
+    inner join picture_tags pts
+      on pts.picture_uuid = p.uuid
+    group by p.id
+    order by ?                                     -- < orderBy
+    limit ?                                        -- < limit
+    offset ?                                       -- < offset
+  |]) conn >>= parseMany
+
+----------------------------------------------------------------------
+
+data FindByTagsInput = FindByTagsInput {
+  tags :: [Text],
+  orderBy :: OrderBy,
+  pagination :: Maybe PaginationInput
+}
+
+instance Defaults FindByTagsInput where
+  def = FindByTagsInput [] (OrderBy ID DESC) Nothing
 
 -- | Returns a list of pictures with any of the given tags
 findByTags

@@ -10,6 +10,8 @@ module Web.GraphQL.Resolver.Pictures
 where
 
 import           Model.Picture                  ( FindByTagsInput(..)
+                                                , GetAllInput(..)
+                                                , getAll
                                                 , findByTags
                                                 , getByFileName
                                                 )
@@ -47,7 +49,7 @@ data PictureInput = PictureArgs
   } deriving (Generic, GQLType)
 
 data PicturesInput = PicturesArgs
-  { tags      :: [Text],
+  { tags       :: Maybe [Text],
     pagination :: Maybe PaginationInput
   } deriving (Generic, GQLType)
 
@@ -72,5 +74,10 @@ pictureResolver conn PictureArgs { fileName } =
   liftEither . liftM mapRecord $ getByFileName fileName conn
 
 picturesResolver :: Connection -> PicturesInput -> IORes e [Picture]
-picturesResolver conn PicturesArgs { tags, pagination } =
-  liftEither . liftM mapRecords $ findByTags def { tags, pagination } conn
+picturesResolver conn PicturesArgs { tags = Nothing, pagination } =
+  liftEither . liftM mapRecords $ getAll (def { pagination } :: GetAllInput)
+                                         conn
+picturesResolver conn PicturesArgs { tags = Just tags, pagination } =
+  liftEither . liftM mapRecords $ findByTags
+    (def { tags, pagination } :: FindByTagsInput)
+    conn
