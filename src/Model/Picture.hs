@@ -117,30 +117,32 @@ findByTags
 findByTags FindByTagsInput{..} conn =
   let PaginationParams {..} = parsePaginationInput pagination
   in $(genJsonQuery [qq|
-    select p.uuid                 as uuid        -- UUID
-         , p.file_name            as file_name   -- Text
-         , p.url                  as url         -- Text
-         , p.mime_type            as mime_type   -- Text
-         , p.file_hash            as file_hash   -- Text
-         , array_agg(pt.tag)      as tags        -- [Text]
+    select p.uuid                 as uuid          -- UUID
+         , p.file_name            as file_name     -- Text
+         , p.url                  as url           -- Text
+         , p.mime_type            as mime_type     -- Text
+         , p.file_hash            as file_hash     -- Text
+         , array_agg(pts.tag)     as tags          -- [Text]
     from pictures p
-    inner join picture_tags pt
-      on pt.picture_uuid = p.uuid
-    where pt.tag in (
-      /* -- Select a list of aliases corresponding to all queried tags */
-      select distinct(v.value)
-      from tag_aliases ta
-      cross join lateral (
-        values ('alias', ta.alias), ('tag', ta.tag)
-      ) v (col, value)
-      where array[ta.tag,ta.alias]::text[]  && ? -- < tags
-      union all
-      select unnest(
-        ?                                        -- < tags
+    inner join picture_tags pts
+      on pts.picture_uuid = p.uuid
+    inner join picture_tags ptw
+      on ptw.picture_uuid = p.uuid
+      and ptw.tag in (
+        /* -- Select a list of aliases corresponding to all queried tags */
+        select v.value
+        from tag_aliases ta
+        cross join lateral (
+          values ('alias', ta.alias), ('tag', ta.tag)
+        ) v (col, value)
+        where array[ta.tag,ta.alias]::text[]  && ? -- < tags
+        union all
+        select unnest(
+          ?                                        -- < tags
+        )
       )
-    )
     group by p.uuid
-    order by ?                                   -- < orderBy
-    limit ?                                      -- < limit
-    offset ?                                     -- < offset
+    order by ?                                     -- < orderBy
+    limit ?                                        -- < limit
+    offset ?                                       -- < offset
   |]) conn >>= parseMany
