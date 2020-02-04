@@ -19,6 +19,13 @@ packages:
   original:
     hackage: postgresql-simple-typed-0.1.1.1
 - completed:
+    hackage: postgresql-simple-named-0.0.2.0@sha256:e8756b2cc4618b959c4a2ef4f32436841cc2bd6ddfcafcdf3298990eca4c38b2,3290
+    pantry-tree:
+      size: 386
+      sha256: d8a47494c00e943100ec424e0b514c530a13b456f160e2a2d76a7ff5c613157f
+  original:
+    hackage: postgresql-simple-named-0.0.2.0
+- completed:
     hackage: typedquery-0.1.1.2@sha256:7c401b2932f0c4136af0b05b1f3507e2b4d93e84a9cf122d706e3e6b82601b3b,1551
     pantry-tree:
       size: 426

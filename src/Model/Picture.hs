@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveAnyClass #-}
+
 module Model.Picture
   ( RecordError(..)
   , Picture(..)
@@ -12,11 +14,14 @@ module Model.Picture
   , findByTags )
 where
 
+import GHC.Generics
 import           Defaults
 import           Model
 import           Model.Pagination
+import           Model.Picture.Query
 
 import           Control.Monad
+import           Control.Monad.Error.Class (liftEither)
 import           Control.Applicative (empty)
 
 import           Data.Aeson
@@ -24,12 +29,15 @@ import           Data.Maybe
 import           Data.Text (Text)
 import           Data.UUID ( UUID )
 import           Data.String.QM
+import           Data.Tuple.Curry (uncurryN)
 
 import           Data.ByteString.Builder        ( string8 )
 
-import qualified Database.PostgreSQL.Simple    as PG
-import Database.PostgreSQL.Simple.ToField (Action(..), ToField(..))
-import Database.PostgreSQL.Simple.TypedQuery (genJsonQuery)
+import            Database.PostgreSQL.Simple    ( Only(..), Connection )
+import            Database.PostgreSQL.Simple.ToField (Action(..), ToField(..))
+import           Database.PostgreSQL.Simple.FromRow ( FromRow(..) )
+import            Database.PostgreSQL.Simple.TypedQuery (genJsonQuery)
+import           PgNamed ( (=?), queryNamed, PgNamedError )
 
 -- Schema
 ----------------------------------------------------------------------
@@ -42,7 +50,7 @@ data Picture = Picture {
   url      :: Text,
   mimeType :: Text,
   tags     :: [Text]
-} deriving (Show, Eq)
+} deriving (Generic,Show, Eq, FromRow)
 
 instance FromJSON Picture where
   parseJSON (Object v) = do
@@ -80,7 +88,7 @@ instance ToField OrderBy where
 
 ----------------------------------------------------------------------
 -- | Returns one picture
-getBy :: (ToField a) => IndexedField -> a -> PG.Connection -> IO (Either RecordError (Maybe Picture))
+getBy :: (ToField a) => IndexedField -> a -> Connection -> IO (Either RecordError (Maybe Picture))
 getBy field value conn = do
   $(genJsonQuery [qq|
     select p.id                   as id          -- Int
@@ -98,10 +106,10 @@ getBy field value conn = do
     group by p.id
   |]) conn >>= parseOne
 
-getByUUID :: UUID -> PG.Connection -> IO (Either RecordError (Maybe Picture))
+getByUUID :: UUID -> Connection -> IO (Either RecordError (Maybe Picture))
 getByUUID = getBy UUID
 
-getByFileName :: Text -> PG.Connection -> IO (Either RecordError (Maybe Picture))
+getByFileName :: Text -> Connection -> IO (Either RecordError (Maybe Picture))
 getByFileName = getBy FileName
 
 ----------------------------------------------------------------------
@@ -115,7 +123,7 @@ instance Defaults GetAllInput where
   def = GetAllInput (OrderBy ID DESC) Nothing
 
 -- | Returns all pictures paginated with no filters
-getAll :: GetAllInput -> PG.Connection -> IO (Either RecordError [Picture])
+getAll :: GetAllInput -> Connection -> IO (Either RecordError [Picture])
 getAll GetAllInput{..} conn =
   let PaginationParams {..} = parsePaginationInput pagination
   in $(genJsonQuery [qq|
@@ -148,37 +156,12 @@ instance Defaults FindByTagsInput where
 
 -- | Returns a list of pictures with any of the given tags
 findByTags
-  :: FindByTagsInput -> PG.Connection -> IO (Either RecordError [Picture])
+  :: FindByTagsInput -> Connection -> IO (Either RecordError [Picture])
 findByTags FindByTagsInput{..} conn =
   let PaginationParams {..} = parsePaginationInput pagination
-  in $(genJsonQuery [qq|
-    select p.id                   as id            -- Int
-         , p.uuid                 as uuid          -- UUID
-         , p.file_name            as file_name     -- Text
-         , p.url                  as url           -- Text
-         , p.mime_type            as mime_type     -- Text
-         , p.file_hash            as file_hash     -- Text
-         , array_agg(pts.tag)     as tags          -- [Text]
-    from pictures p
-    inner join picture_tags pts
-      on pts.picture_uuid = p.uuid
-    inner join picture_tags ptw
-      on ptw.picture_uuid = p.uuid
-      and ptw.tag in (
-        /* -- Select a list of aliases corresponding to all queried tags */
-        select v.value
-        from tag_aliases ta
-        cross join lateral (
-          values ('alias', ta.alias), ('tag', ta.tag)
-        ) v (col, value)
-        where array[ta.tag,ta.alias]::text[]  && ? -- < tags
-        union all
-        select unnest(
-          ?                                        -- < tags
-        )
-      )
-    group by p.id
-    order by ?                                     -- < orderBy
-    limit ?                                        -- < limit
-    offset ?                                       -- < offset
-  |]) conn >>= parseMany
+  in parseResultNamed $ queryNamed conn findByTagsQuery [
+    "tags"    =? tags,
+    "orderBy" =? orderBy,
+    "limit"   =? limit,
+    "offset"  =? offset
+  ]

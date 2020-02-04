@@ -49,6 +49,7 @@ dependencies:
 - typedquery
 - postgresql-simple
 - postgresql-simple-url
+- postgresql-simple-named
 - postgresql-simple-typed
 - morpheus-graphql
 - http-types
