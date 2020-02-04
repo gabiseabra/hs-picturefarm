@@ -1,5 +1,3 @@
-{-# LANGUAGE MultiParamTypeClasses, TypeSynonymInstances, FlexibleInstances #-}
-
 module Model
   ( RecordError(..)
   , parseOne
@@ -23,23 +21,14 @@ import           Data.Aeson.Types               ( parseJSON
                                                 , listValue
                                                 )
 import           Data.Typeable
-import           Data.String                    ( IsString(..) )
-import           Data.String.Conversions        ( ConvertibleStrings(..) )
 
 import           PgNamed                        ( WithNamedError )
-import           Database.PostgreSQL.Simple     ( Query )
 import           Database.PostgreSQL.Simple.ToField
                                                 ( ToField(..) )
 import           Database.PostgreSQL.Simple.FromField
                                                 ( FromField(..) )
 import           Database.PostgreSQL.Simple.Types
                                                 ( PGArray(..) )
-
--- Utilities
-----------------------------------------------------------------------
-
-instance ConvertibleStrings String Query where
-  convertString = fromString
 
 -- Postgres field parsers
 ----------------------------------------------------------------------

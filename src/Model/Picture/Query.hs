@@ -1,9 +1,10 @@
-{-#  LANGUAGE MultiParamTypeClasses #-}
-
 module Model.Picture.Query where
 
-import           Model
+import           Database.QueryBuilder
 
+import           Data.List                      ( concat
+                                                , intersperse
+                                                )
 import           Data.Text                      ( Text )
 import           Data.UUID                      ( UUID )
 import           Data.String.Conversions        ( cs )
@@ -25,7 +26,12 @@ fromPictures = [qq|
   inner join picture_tags pt on pt.picture_uuid = p.uuid
   |]
 
-joinTagsFilter = [qq|
+-- Filters
+----------------------------------------------------------------------
+
+tagsFilter = Filter
+  JOIN
+  [qq|
   inner join picture_tags ptw
     on ptw.picture_uuid = p.uuid
     and ptw.tag in (
@@ -41,10 +47,24 @@ joinTagsFilter = [qq|
     )
   |]
 
-findByTagsQuery :: Query
-findByTagsQuery = cs $ [qm|
+-- Queries
+----------------------------------------------------------------------
+
+getByQuery :: Query
+getByQuery = cs $ [qm|
     ${fromPictures}
-    ${joinTagsFilter}
+    where ?field = ?value
+    limit 1
+  |]
+
+findByQuery :: [Filter] -> Query
+findByQuery filters =
+  let joinClause  = buildClause JOIN filters
+      whereClause = buildClause WHERE filters
+  in  cs $ [qm|
+    ${fromPictures}
+    ${joinClause}
+    ${whereClause}
     group by p.id
     order by ?orderBy
     limit ?limit offset ?offset

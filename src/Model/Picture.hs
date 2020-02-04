@@ -114,52 +114,22 @@ getByFileName = getBy FileName
 
 ----------------------------------------------------------------------
 
-data GetAllInput = GetAllInput {
+data FindInput = FindByTagsInput {
+  tags :: Maybe [Text],
   orderBy :: OrderBy,
   pagination :: Maybe PaginationInput
 }
 
-instance Defaults GetAllInput where
-  def = GetAllInput (OrderBy ID DESC) Nothing
+instance Defaults FindInput where
+  def = FindInput Nothing (OrderBy ID DESC) Nothing
 
--- | Returns all pictures paginated with no filters
-getAll :: GetAllInput -> Connection -> IO (Either RecordError [Picture])
-getAll GetAllInput{..} conn =
+findFilters FindByTagsInput{..} = []
+
+find :: FindInput -> Connection -> IO (Either RecordError [Picture])
+find input@FindByTagsInput{..} conn =
   let PaginationParams {..} = parsePaginationInput pagination
-  in $(genJsonQuery [qq|
-    select p.id                   as id            -- Int
-         , p.uuid                 as uuid          -- UUID
-         , p.file_name            as file_name     -- Text
-         , p.url                  as url           -- Text
-         , p.mime_type            as mime_type     -- Text
-         , p.file_hash            as file_hash     -- Text
-         , array_agg(pts.tag)     as tags          -- [Text]
-    from pictures p
-    inner join picture_tags pts
-      on pts.picture_uuid = p.uuid
-    group by p.id
-    order by ?                                     -- < orderBy
-    limit ?                                        -- < limit
-    offset ?                                       -- < offset
-  |]) conn >>= parseMany
-
-----------------------------------------------------------------------
-
-data FindByTagsInput = FindByTagsInput {
-  tags :: [Text],
-  orderBy :: OrderBy,
-  pagination :: Maybe PaginationInput
-}
-
-instance Defaults FindByTagsInput where
-  def = FindByTagsInput [] (OrderBy ID DESC) Nothing
-
--- | Returns a list of pictures with any of the given tags
-findByTags
-  :: FindByTagsInput -> Connection -> IO (Either RecordError [Picture])
-findByTags FindByTagsInput{..} conn =
-  let PaginationParams {..} = parsePaginationInput pagination
-  in parseResultNamed $ queryNamed conn findByTagsQuery [
+      filters = findFilters input
+  in parseResultNamed $ queryNamed conn (findByQuery filters) [
     "tags"    =? tags,
     "orderBy" =? orderBy,
     "limit"   =? limit,
