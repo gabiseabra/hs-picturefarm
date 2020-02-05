@@ -53,7 +53,8 @@ tagsFilter = Filter
 getPictureByQuery :: Query
 getPictureByQuery = cs $ [qm|
     ${fromPictures}
-    where ?field = ?value
+    where p.?field = ?value
+    group by p.id
     limit 1
   |]
 

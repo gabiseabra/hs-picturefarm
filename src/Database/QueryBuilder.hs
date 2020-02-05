@@ -37,7 +37,6 @@ class QueryOptions a where
   filterFields :: a -> [String]
 
   applyFilters :: String -> a -> [Filter]
-  applyFilters _ _ = []
 
   toFilters :: a -> [Filter]
   toFilters a = concatMap (flip applyFilters $ a) $ filterFields a

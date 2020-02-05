@@ -2,7 +2,6 @@ module Model
   ( RecordError(..)
   , parseOne
   , parseMany
-  , parseResultNamed
   )
 where
 
@@ -13,6 +12,7 @@ import           Control.Monad.Trans.Except     ( ExceptT
 import           Control.Monad.IO.Class         ( MonadIO
                                                 , liftIO
                                                 )
+import           Control.Error.Safe             ( headZ )
 
 import           Data.Either.Combinators
 import           Data.Aeson
@@ -44,13 +44,8 @@ instance (FromField a, Typeable a) => FromField [a] where
 
 data RecordError = RecordError String deriving (Show, Eq)
 
-parseOne :: (FromJSON a) => [Value] -> IO (Either RecordError (Maybe a))
-parseOne [] = return $ Right Nothing
-parseOne (record : _) =
-  return . mapBoth RecordError Just . parseEither parseJSON $ record
+parseOne :: (Show e) => ExceptT e IO [a] -> IO (Either RecordError (Maybe a))
+parseOne = liftM (mapRight headZ) . parseMany
 
-parseMany :: (FromJSON a) => [Value] -> IO (Either RecordError [a])
-parseMany = return . mapLeft RecordError . mapM (parseEither parseJSON)
-
-parseResultNamed :: (Show e) => ExceptT e IO a -> IO (Either RecordError a)
-parseResultNamed = (liftM $ mapLeft $ RecordError . show) . runExceptT
+parseMany :: (Show e) => ExceptT e IO [a] -> IO (Either RecordError [a])
+parseMany = (liftM $ mapLeft $ RecordError . show) . runExceptT
