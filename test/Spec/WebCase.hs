@@ -8,6 +8,7 @@ module Spec.WebCase
   , setupApplication
   , withApplication
   , aroundApplication
+  , bodyContains
   )
 where
 

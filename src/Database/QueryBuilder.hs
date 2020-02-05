@@ -39,11 +39,12 @@ class QueryOptions a where
   applyFilters :: String -> a -> [Filter]
 
   toFilters :: a -> [Filter]
-toFilters a = concatMap (flip applyFilters $ a) $ filterableFields a
+  toFilters a = concatMap (flip applyFilters $ a) $ filterableFields a
 
   buildClause :: ClauseType -> a -> String
-  buildClause JOIN  = between "\n" . pickByType JOIN . toFilters
-  buildClause WHERE = prefix "where" . between "and" . pickByType WHERE . toFilters
+  buildClause JOIN = between "\n" . pickByType JOIN . toFilters
+  buildClause WHERE =
+    prefix "where" . between "and" . pickByType WHERE . toFilters
 
 instance QueryOptions [Filter] where
   filterableFields _ = []
