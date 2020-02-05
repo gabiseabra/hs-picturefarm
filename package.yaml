@@ -36,10 +36,10 @@ dependencies:
 - composition-prelude
 - errors
 - mtl
+- data-default-class
 - text
 - tuple
 - either
-- aeson
 - uuid
 - bytestring
 - string-conversions
@@ -48,11 +48,9 @@ dependencies:
 - transformers
 - envy
 - load-env
-- typedquery
 - postgresql-simple
 - postgresql-simple-url
 - postgresql-simple-named
-- postgresql-simple-typed
 - morpheus-graphql
 - http-types
 - scotty

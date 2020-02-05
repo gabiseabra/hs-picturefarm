@@ -15,14 +15,8 @@ import           Control.Monad.IO.Class         ( MonadIO
 import           Control.Error.Safe             ( headZ )
 
 import           Data.Either.Combinators
-import           Data.Aeson
-import           Data.Aeson.Types               ( parseJSON
-                                                , parseEither
-                                                , listValue
-                                                )
 import           Data.Typeable
 
-import           PgNamed                        ( WithNamedError )
 import           Database.PostgreSQL.Simple.ToField
                                                 ( ToField(..) )
 import           Database.PostgreSQL.Simple.FromField

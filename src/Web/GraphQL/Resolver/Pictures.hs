@@ -7,24 +7,24 @@ module Web.GraphQL.Resolver.Pictures
   )
 where
 
+import           GHC.Generics
+
 import           Model.Picture           hiding ( Picture )
 import qualified Model.Picture                 as DB
                                                 ( Picture(..) )
 import           Model.Pagination               ( PaginationInput )
 import           Model                          ( RecordError )
 import           Env                            ( Connection )
-import           Defaults
 
-import           GHC.Generics
-
-import           Control.Monad.Trans.Class
-import           Control.Monad
-
+import           Data.Default.Class
 import           Data.Either.Combinators
 import           Data.UUID
 import           Data.Text                      ( Text )
 import           Data.Morpheus.Kind
 import           Data.Morpheus.Types
+
+import           Control.Monad.Trans.Class
+import           Control.Monad
 
 -- GraphQL types
 ----------------------------------------------------------------------

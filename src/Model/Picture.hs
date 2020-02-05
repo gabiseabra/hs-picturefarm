@@ -12,7 +12,6 @@ where
 
 import           GHC.Generics
 
-import           Defaults
 import           Database.QueryBuilder
 import           Model
 import           Model.Pagination
@@ -22,26 +21,20 @@ import           Control.Monad
 import           Control.Monad.Error.Class      ( liftEither )
 import           Control.Applicative            ( empty )
 
-import           Data.Aeson
+import           Data.Default.Class
 import           Data.Maybe
 import           Data.Text                      ( Text )
 import           Data.UUID                      ( UUID )
 import           Data.String.QM
 import           Data.Tuple.Curry               ( uncurryN )
 
-import           Data.ByteString.Builder        ( string8 )
-
 import           Database.PostgreSQL.Simple     ( Only(..)
                                                 , Connection
                                                 )
 import           Database.PostgreSQL.Simple.ToField
-                                                ( Action(..)
-                                                , ToField(..)
-                                                )
+                                                ( ToField )
 import           Database.PostgreSQL.Simple.FromRow
                                                 ( FromRow(..) )
-import           Database.PostgreSQL.Simple.TypedQuery
-                                                ( genJsonQuery )
 import           PgNamed                        ( (=?)
                                                 , queryNamed
                                                 , PgNamedError
@@ -58,32 +51,7 @@ data Picture = Picture {
   url      :: Text,
   mimeType :: Text,
   tags     :: [Text]
-} deriving (Generic,Show, Eq, FromRow)
-
-instance FromJSON Picture where
-  parseJSON (Object v) = do
-    id       <- v .: "id"
-    uuid     <- v .: "uuid"
-    fileName <- v .: "file_name"
-    fileHash <- v .: "file_hash"
-    url      <- v .: "url"
-    mimeType <- v .: "mime_type"
-    tags     <- v .: "tags"
-    return (Picture id uuid fileName fileHash url mimeType tags)
-
-  parseJSON _ = empty
-
-----------------------------------------------------------------------
-
-data IndexedField = ID | UUID | FileName
-
-instance Show IndexedField where
-  show ID       = "id"
-  show UUID     = "uuid"
-  show FileName = "file_name"
-
-instance ToField IndexedField where
-  toField = Plain . string8 . show
+} deriving (Generic, Show, Eq, FromRow)
 
 -- Queries
 ----------------------------------------------------------------------
@@ -124,5 +92,5 @@ instance QueryOptions FindPicturesInput where
   applyFilters "tags" FindPicturesInput { tags = Just _ } = [tagsFilter]
   applyFilters _      _ = []
 
-instance Defaults FindPicturesInput where
+instance Default FindPicturesInput where
   def = FindPicturesInput Nothing (OrderBy ID DESC) Nothing

@@ -3,10 +3,10 @@ module Model.PictureSpec where
 import           Spec.ModelCase
 
 
-import           Defaults
 import           Model.Pagination
 import           Model.Picture
 
+import           Data.Default.Class
 import           Data.UUID
 import qualified Data.UUID.V4                  as UUIDv4
 import           Data.List

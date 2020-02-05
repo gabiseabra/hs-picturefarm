@@ -7,12 +7,27 @@ import           Data.List                      ( concat
                                                 )
 import           Data.Text                      ( Text )
 import           Data.UUID                      ( UUID )
+import           Data.ByteString.Builder        ( string8 )
 import           Data.String.Conversions        ( cs )
 import           Data.String.QM
 
 import           Database.PostgreSQL.Simple     ( Query )
+import           Database.PostgreSQL.Simple.ToField
+                                                ( Action(..)
+                                                , ToField(..)
+                                                )
 
 type PictureFields = (Int, UUID, Text, Text, Text, Text, [Text])
+
+data IndexedField = ID | UUID | FileName
+
+instance Show IndexedField where
+  show ID       = "id"
+  show UUID     = "uuid"
+  show FileName = "file_name"
+
+instance ToField IndexedField where
+  toField = Plain . string8 . show
 
 fromPictures = [qq|
   select p.id
