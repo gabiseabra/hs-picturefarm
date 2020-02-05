@@ -24,6 +24,7 @@ default-extensions:
 - QuasiQuotes
 - OverloadedStrings
 - DeriveGeneric
+- DeriveAnyClass
 - TypeFamilies
 - NamedFieldPuns
 - DisambiguateRecordFields

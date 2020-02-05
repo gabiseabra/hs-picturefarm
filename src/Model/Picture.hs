@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
-
 module Model.Picture
   ( RecordError(..)
   , Picture(..)

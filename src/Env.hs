@@ -1,3 +1,4 @@
+{-# LANGUAGE NoDeriveAnyClass #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Env

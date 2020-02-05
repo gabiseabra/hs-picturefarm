@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
-
 module Web.GraphQL.Resolver.Pictures
   ( Picture
   , PictureInput
