@@ -33,9 +33,8 @@ withConnectInfo fn config = case parseDatabaseUrl . databaseUrl $ config of
   _                   -> throwIO InvalidDatabaseUrl
 
 createConnection :: Config -> IO Connection
-createConnection = withConnectInfo $ connect
+createConnection = withConnectInfo connect
 
 createConnectionPool :: Config -> IO (Pool Connection)
-createConnectionPool =
-  withConnectInfo
-    $ (\connectInfo -> createPool (connect connectInfo) close 2 5 10)
+createConnectionPool = withConnectInfo
+  (\connectInfo -> createPool (connect connectInfo) close 2 5 10)

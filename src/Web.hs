@@ -25,4 +25,4 @@ onException _req e = print ("Error: " ++ show e)
 
 warpSettings :: Config -> Settings
 warpSettings config@Config { port } =
-  setPort port $ setOnException onException $ defaultSettings
+  setPort port $ setOnException onException defaultSettings

@@ -39,7 +39,7 @@ instance (FromField a, Typeable a) => FromField [a] where
 data RecordError = RecordError String deriving (Show, Eq)
 
 parseOne :: (Show e) => ExceptT e IO [a] -> IO (Either RecordError (Maybe a))
-parseOne = liftM (mapRight headZ) . parseMany
+parseOne = fmap (mapRight headZ) . parseMany
 
 parseMany :: (Show e) => ExceptT e IO [a] -> IO (Either RecordError [a])
-parseMany = (liftM $ mapLeft $ RecordError . show) . runExceptT
+parseMany = fmap (mapLeft $ RecordError . show) . runExceptT

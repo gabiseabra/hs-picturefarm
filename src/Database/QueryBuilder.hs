@@ -32,7 +32,7 @@ instance ConvertibleStrings String Query where
 ----------------------------------------------------------------------
 
 -- | Helpers for building composable filters for PostgreSQL queries
--- with for record structures which represents options for a statement
+-- with record structures which represents options for a statement
 class QueryOptions a where
   filterableFields :: a -> [String]
 

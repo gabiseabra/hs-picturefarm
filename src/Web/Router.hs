@@ -20,14 +20,6 @@ import           Network.Wai                    ( Application )
 import           Network.HTTP.Types
 import           Web.Scotty.Trans
 
--- Helpers
-----------------------------------------------------------------------
-
-sendError :: (ScottyError e, Monad m) => Status -> ActionT e m ()
-sendError s = status s >> sendErrorMessage s
-
-sendErrorMessage (status404) = text "Not found"
-
 -- Routes
 ----------------------------------------------------------------------
 
@@ -50,3 +42,11 @@ router = do
     raw rawResponse
 
   notFound $ sendError status404
+
+-- Helpers
+----------------------------------------------------------------------
+
+sendError :: (ScottyError e, Monad m) => Status -> ActionT e m ()
+sendError s = status s >> sendErrorMessage s
+
+sendErrorMessage status404 = text "Not found"
