@@ -24,7 +24,7 @@ import           Database.PostgreSQL.Simple.FromField
 import           Database.PostgreSQL.Simple.Types
                                                 ( PGArray(..) )
 
--- Postgres field parsers
+-- Generic PostgreSQL field parsers
 ----------------------------------------------------------------------
 
 instance (ToField a) => ToField [a] where

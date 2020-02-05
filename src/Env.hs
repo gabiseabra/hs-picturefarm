@@ -48,7 +48,6 @@ newtype EnvM a
       MonadReader Env
     )
 
-
 ----------------------------------------------------------------------
 
 initialize :: IO AppContext
