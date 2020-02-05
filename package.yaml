@@ -24,6 +24,7 @@ default-extensions:
 - QuasiQuotes
 - OverloadedStrings
 - DeriveGeneric
+- DeriveAnyClass
 - TypeFamilies
 - NamedFieldPuns
 - DisambiguateRecordFields
@@ -33,11 +34,12 @@ default-extensions:
 dependencies:
 - base >= 4.7 && < 5
 - composition-prelude
+- errors
 - mtl
+- data-default-class
 - text
 - tuple
 - either
-- aeson
 - uuid
 - bytestring
 - string-conversions
@@ -46,10 +48,9 @@ dependencies:
 - transformers
 - envy
 - load-env
-- typedquery
 - postgresql-simple
 - postgresql-simple-url
-- postgresql-simple-typed
+- postgresql-simple-named
 - morpheus-graphql
 - http-types
 - scotty

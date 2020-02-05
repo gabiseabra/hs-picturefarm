@@ -6,13 +6,15 @@ module Model
 where
 
 import           Control.Monad
+import           Control.Monad.Trans.Except     ( ExceptT
+                                                , runExceptT
+                                                )
+import           Control.Monad.IO.Class         ( MonadIO
+                                                , liftIO
+                                                )
+import           Control.Error.Safe             ( headZ )
 
 import           Data.Either.Combinators
-import           Data.Aeson
-import           Data.Aeson.Types               ( parseJSON
-                                                , parseEither
-                                                , listValue
-                                                )
 import           Data.Typeable
 
 import           Database.PostgreSQL.Simple.ToField
@@ -36,10 +38,8 @@ instance (FromField a, Typeable a) => FromField [a] where
 
 data RecordError = RecordError String deriving (Show, Eq)
 
-parseOne :: (FromJSON a) => [Value] -> IO (Either RecordError (Maybe a))
-parseOne [] = return $ Right Nothing
-parseOne (record : _) =
-  return . mapBoth RecordError Just . parseEither parseJSON $ record
+parseOne :: (Show e) => ExceptT e IO [a] -> IO (Either RecordError (Maybe a))
+parseOne = liftM (mapRight headZ) . parseMany
 
-parseMany :: (FromJSON a) => [Value] -> IO (Either RecordError [a])
-parseMany = return . mapLeft RecordError . mapM (parseEither parseJSON)
+parseMany :: (Show e) => ExceptT e IO [a] -> IO (Either RecordError [a])
+parseMany = (liftM $ mapLeft $ RecordError . show) . runExceptT

@@ -5,14 +5,9 @@ module Model.Pagination
   )
 where
 
-import           Model
-
 import           GHC.Generics
 
 import           Data.Maybe
-import           Data.String.QM
-
-import           Database.PostgreSQL.Simple.TypedQuery
 
 -- Schema
 ----------------------------------------------------------------------

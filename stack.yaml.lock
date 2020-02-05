@@ -5,27 +5,6 @@
 
 packages:
 - completed:
-    hackage: morpheus-graphql-0.10.0@sha256:02d06672f508d0c199932f81fdab1337e967375d57d91cec00fa02b7bfc70abb,24229
-    pantry-tree:
-      size: 35491
-      sha256: bab034192a83daee625055d762eb988fb139cbed12c549ba8939c1fcade2d25f
-  original:
-    hackage: morpheus-graphql-0.10.0
-- completed:
-    hackage: postgresql-simple-typed-0.1.1.1@sha256:d6fe136341147fbbe948341a647390bd880dd6115da39638cd0781869cb32b45,1287
-    pantry-tree:
-      size: 417
-      sha256: cd7a81315b5dc697cf53df10c0700e49886b37c0813a1ab1e6a9255c04a9ec03
-  original:
-    hackage: postgresql-simple-typed-0.1.1.1
-- completed:
-    hackage: typedquery-0.1.1.2@sha256:7c401b2932f0c4136af0b05b1f3507e2b4d93e84a9cf122d706e3e6b82601b3b,1551
-    pantry-tree:
-      size: 426
-      sha256: 90791454d3b33f660240e1c92cf8a1270e2b5f5a3cde509160e09d2630d24139
-  original:
-    hackage: typedquery-0.1.1.2
-- completed:
     hackage: ghc-prim-0.5.3@sha256:2284e90b0d56dfd389588b5c927e7f22c17f1d6c2291464cb0cc3f9651b0ba23,2319
     pantry-tree:
       size: 1243
@@ -39,6 +18,20 @@ packages:
       sha256: c05343a0bfe62dd3e14ebf89e440cf5bc9148957f2596efcaf0c9553f235befc
   original:
     hackage: composition-prelude-2.0.5.0
+- completed:
+    hackage: postgresql-simple-named-0.0.2.0@sha256:e8756b2cc4618b959c4a2ef4f32436841cc2bd6ddfcafcdf3298990eca4c38b2,3290
+    pantry-tree:
+      size: 386
+      sha256: d8a47494c00e943100ec424e0b514c530a13b456f160e2a2d76a7ff5c613157f
+  original:
+    hackage: postgresql-simple-named-0.0.2.0
+- completed:
+    hackage: morpheus-graphql-0.10.0@sha256:02d06672f508d0c199932f81fdab1337e967375d57d91cec00fa02b7bfc70abb,24229
+    pantry-tree:
+      size: 35491
+      sha256: bab034192a83daee625055d762eb988fb139cbed12c549ba8939c1fcade2d25f
+  original:
+    hackage: morpheus-graphql-0.10.0
 - completed:
     hackage: hspec-wai-0.10.1@sha256:56dd9ec1d56f47ef1946f71f7cbf070e4c285f718cac1b158400ae5e7172ef47,2290
     pantry-tree:
