@@ -50,15 +50,15 @@ tagsFilter = Filter
 -- Queries
 ----------------------------------------------------------------------
 
-getByQuery :: Query
-getByQuery = cs $ [qm|
+getPictureByQuery :: Query
+getPictureByQuery = cs $ [qm|
     ${fromPictures}
     where ?field = ?value
     limit 1
   |]
 
-findByQuery :: [Filter] -> Query
-findByQuery filters =
+findPictureQuery :: (QueryOptions a) => a -> Query
+findPictureQuery filters =
   let joinClause  = buildClause JOIN filters
       whereClause = buildClause WHERE filters
   in  cs $ [qm|

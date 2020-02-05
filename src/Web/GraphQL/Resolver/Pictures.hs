@@ -7,12 +7,7 @@ module Web.GraphQL.Resolver.Pictures
   )
 where
 
-import           Model.Picture                  ( FindByTagsInput(..)
-                                                , GetAllInput(..)
-                                                , getAll
-                                                , findByTags
-                                                , getByFileName
-                                                )
+import           Model.Picture           hiding ( Picture )
 import qualified Model.Picture                 as DB
                                                 ( Picture(..) )
 import           Model.Pagination               ( PaginationInput )
@@ -69,13 +64,9 @@ mapRecords = mapBoth show (map transform)
 
 pictureResolver :: Connection -> PictureInput -> IORes e (Maybe Picture)
 pictureResolver conn PictureArgs { fileName } =
-  liftEither . liftM mapRecord $ getByFileName fileName conn
+  liftEither . liftM mapRecord $ getPictureBy FileName fileName conn
 
 picturesResolver :: Connection -> PicturesInput -> IORes e [Picture]
-picturesResolver conn PicturesArgs { tags = Nothing, pagination } =
-  liftEither . liftM mapRecords $ getAll (def { pagination } :: GetAllInput)
-                                         conn
-picturesResolver conn PicturesArgs { tags = Just tags, pagination } =
-  liftEither . liftM mapRecords $ findByTags
-    (def { tags, pagination } :: FindByTagsInput)
-    conn
+picturesResolver conn PicturesArgs { tags, pagination } =
+  let input = def { tags, pagination } :: FindPicturesInput
+  in  liftEither . liftM mapRecords $ findPictures input conn

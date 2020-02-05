@@ -56,19 +56,19 @@ mapIds = (map uuid) . (fromRight [])
 
 spec :: Spec
 spec = setup $ do
-  describe "getByUUID" $ do
+  describe "getPictureBy" $ do
     it "returns one picture with valid uuid" $ \(conn, (actual_uuid : _)) -> do
-      getByUUID actual_uuid conn
+      getPictureBy UUID actual_uuid conn
         >>= (`shouldBeRightAnd` ((== Just actual_uuid) . liftM uuid))
 
     it "returns NotFound with invalid uuid" $ \(conn, _) -> do
       UUIDv4.nextRandom
-        >>= flip getByUUID conn
+        >>= flip (getPictureBy UUID) conn
         >>= (`shouldBeRightAnd` (== Nothing))
 
-  describe "findByTags" $ do
+  describe "findPictures" $ do
     it "queries pictures with a given tag" $ \(conn, _) -> do
-      findByTags def { tags = ["a"] } conn
+      findPictures def { tags = Just ["a"] } conn
         >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test2.jpg"])
                                 . sort
                                 . map fileName
@@ -76,7 +76,7 @@ spec = setup $ do
             )
 
     it "queries pictures with any of the given tag" $ \(conn, _) -> do
-      findByTags def { tags = ["b", "c"] } conn
+      findPictures def { tags = Just ["b", "c"] } conn
         >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test3.jpg"])
                                 . sort
                                 . map fileName
@@ -84,32 +84,34 @@ spec = setup $ do
             )
 
     it "orders results" $ \(conn, _) -> do
-      desc <- findByTags def { tags = ["a"], orderBy = OrderBy FileName DESC }
-                         conn
-      asc <- findByTags def { tags = ["a"], orderBy = OrderBy FileName ASC }
-                        conn
+      desc <- findPictures
+        def { tags = Just ["a"], orderBy = OrderBy FileName DESC }
+        conn
+      asc <- findPictures
+        def { tags = Just ["a"], orderBy = OrderBy FileName ASC }
+        conn
       (mapIds desc) `shouldBe` (reverse $ mapIds asc)
 
     it "paginates results" $ \(conn, _) -> do
-      findByTags
+      findPictures
           def
-            { tags       = ["d"]
+            { tags       = Just ["d"]
             , pagination =
               Just (PaginationInput { page = Nothing, pageSize = Just 2 })
             }
           conn
         >>= (`shouldBeRightAnd` ((== 2) . length))
-      findByTags
+      findPictures
           def
-            { tags       = ["d"]
+            { tags       = Just ["d"]
             , pagination =
               Just (PaginationInput { page = Just 2, pageSize = Just 2 })
             }
           conn
         >>= (`shouldBeRightAnd` ((== 1) . length))
-      findByTags
+      findPictures
           def
-            { tags       = ["d"]
+            { tags       = Just ["d"]
             , pagination =
               Just (PaginationInput { page = Just 3, pageSize = Just 2 })
             }
