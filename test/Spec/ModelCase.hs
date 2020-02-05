@@ -25,6 +25,46 @@ type PictureTagInput = (UUID, [Text])
 
 type TagAliasInput = (Text, Text)
 
+-- Test helpers
+----------------------------------------------------------------------
+
+-- | Inserts a list of pictures and returns their respective uuids
+insertPictures :: Connection -> [PictureInput] -> IO [UUID]
+insertPictures conn input =
+  map fromOnly <$> returning conn insertPictureQuery input
+
+-- | Inserts a list of tags to pictures
+insertPictureTags :: Connection -> [PictureTagInput] -> IO ()
+insertPictureTags conn input =
+  executeMany conn
+              insertPictureTagQuery
+              (concat . map unnestPictureTagInput $ input)
+    >> return ()
+
+unnestPictureTagInput :: PictureTagInput -> [(UUID, Text)]
+unnestPictureTagInput (uuid, tags) =
+  flip zip tags $ take (length tags) $ repeat uuid
+
+-- | Inserts a list of tag aliases
+insertTagAliases :: Connection -> [TagAliasInput] -> IO ()
+insertTagAliases conn input =
+  executeMany conn insertTagAliasQuery input >> return ()
+
+-- | Removes all records from the database
+cleanupDB :: Connection -> IO Connection
+cleanupDB conn = do
+  _ <- execute_
+    conn
+    [sql|
+    set client_min_messages to warning;
+    truncate tag_aliases cascade;
+    truncate picture_tags cascade;
+    truncate pictures cascade;
+    |]
+  return conn
+
+----------------------------------------------------------------------
+
 insertPictureQuery = [sql|
   insert into pictures (url, file_name, file_hash, mime_type)
   values (?, ?, ?, ?)
@@ -40,35 +80,3 @@ insertTagAliasQuery = [sql|
   insert into tag_aliases (tag, alias)
   values (?, ?)
   |]
-
-insertPictures :: Connection -> [PictureInput] -> IO [UUID]
-insertPictures conn input =
-  map fromOnly <$> returning conn insertPictureQuery input
-
-unnestPictureTagInput :: PictureTagInput -> [(UUID, Text)]
-unnestPictureTagInput (uuid, tags) =
-  flip zip tags $ take (length tags) $ repeat uuid
-
-insertPictureTags :: Connection -> [PictureTagInput] -> IO ()
-insertPictureTags conn input =
-  executeMany conn
-              insertPictureTagQuery
-              (concat . map unnestPictureTagInput $ input)
-    >> return ()
-
-insertTagAliases :: Connection -> [TagAliasInput] -> IO ()
-insertTagAliases conn input =
-  executeMany conn insertTagAliasQuery input >> return ()
-
-cleanupDB :: Connection -> IO Connection
-cleanupDB conn = do
-  _ <- execute_
-    conn
-    [sql|
-    set client_min_messages to warning;
-    truncate tag_aliases cascade;
-    truncate picture_tags cascade;
-    truncate pictures cascade;
-    |]
-  return conn
-

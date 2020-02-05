@@ -87,7 +87,7 @@ data FindPicturesInput = FindPicturesInput {
 }
 
 instance QueryOptions FindPicturesInput where
-  filterFields _ = ["tags"]
+  filterableFields _ = ["tags"]
 
   applyFilters "tags" FindPicturesInput { tags = Just _ } = [tagsFilter]
   applyFilters _      _ = []

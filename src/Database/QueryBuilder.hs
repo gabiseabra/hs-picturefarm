@@ -34,19 +34,20 @@ instance ConvertibleStrings String Query where
 -- | Helpers for building composable filters for PostgreSQL queries
 -- with for record structures which represents options for a statement
 class QueryOptions a where
-  filterFields :: a -> [String]
+  filterableFields :: a -> [String]
 
   applyFilters :: String -> a -> [Filter]
 
   toFilters :: a -> [Filter]
-  toFilters a = concatMap (flip applyFilters $ a) $ filterFields a
+  toFilters a = concatMap (flip applyFilters $ a) $ filterableFields a
 
   buildClause :: ClauseType -> a -> String
-  buildClause JOIN  = between "\n" . pickByType JOIN . toFilters
-  buildClause WHERE = prefix "where" . between "and" . pickByType WHERE . toFilters
+  buildClause JOIN = between "\n" . pickByType JOIN . toFilters
+  buildClause WHERE =
+    prefix "where" . between "and" . pickByType WHERE . toFilters
 
 instance QueryOptions [Filter] where
-  filterFields _ = []
+  filterableFields _ = []
   applyFilters _ a = a
   toFilters a = a
 

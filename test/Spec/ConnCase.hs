@@ -4,7 +4,6 @@ module Spec.ConnCase
   , module Database.PostgreSQL.Simple.SqlQQ
   , openConnection
   , closeConnection
-  , withConnection
   , md5
   )
 where
@@ -23,11 +22,8 @@ import           Data.String.Conversions
 import           Database.PostgreSQL.Simple
 import           Database.PostgreSQL.Simple.SqlQQ
 
-withConnection :: ActionWith Connection -> IO ()
-withConnection action = do
-  conn <- loadConfig (Just Test) >>= createConnection
-  action conn
-  closeConnection conn
+-- Test helpers
+----------------------------------------------------------------------
 
 openConnection :: IO Connection
 openConnection = loadConfig (Just Test) >>= createConnection

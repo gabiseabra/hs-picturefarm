@@ -43,6 +43,15 @@ pictureQuery = [qq|
     }
   }|]
 
+randomPictureQuery = [qq|
+  query randomPicture($tags: [String!]) {
+    randomPicture(tags: $tags) {
+      fileName
+      mimeType
+      url
+    }
+  }|]
+
 picturesQuery = [qq|
   query pictures($tags: [String!], $pagination: PaginationInput) {
     pictures(tags: $tags, pagination: $pagination) {
@@ -72,6 +81,20 @@ spec = setup $ do
     it "returns null with an invalid file name" $ do
       postGQL pictureQuery [json|{fileName: "test0.jpg"}|]
         `shouldRespondWith` [json|{data: {picture: null}}|]
+
+  describe "randomPicture" $ do
+    it "returns some picture with a valid tag" $ do
+      postGQL randomPictureQuery [json|{tags: ["a"]}|]
+        `shouldRespondWith` 200
+                              { matchBody = bodyContains "\"randomPicture\":{"
+                              }
+
+    it "returns null with an invalid tag" $ do
+      postGQL randomPictureQuery [json|{tags: ["x"]}|]
+        `shouldRespondWith` 200
+                              { matchBody = bodyContains
+                                              "\"randomPicture\":null"
+                              }
 
   describe "pictures" $ do
     it "returns a list of pictures with a given tag" $ do

@@ -13,6 +13,9 @@ import           Control.Exception              ( bracket
                                                 , evaluate
                                                 )
 
+-- Expectations
+----------------------------------------------------------------------
+
 shouldBeRightAnd
   :: HasCallStack => Show e => Either e a -> (a -> Bool) -> Expectation
 shouldBeRightAnd ea pred = case ea of
