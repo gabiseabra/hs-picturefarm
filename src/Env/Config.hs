@@ -33,8 +33,11 @@ instance Exception ConfigException
 data Environment = Production | Development | Test
 
 data Config = Config {
-  databaseUrl :: String,
-  port        :: Int
+  port            :: Int,
+  databaseUrl     :: String,
+  cdnCloudName    :: String,
+  cdnUploadPreset :: String,
+  cdnCredentials  :: String
 } deriving (Generic, Show)
 
 instance FromEnv Config

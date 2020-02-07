@@ -41,6 +41,7 @@ dependencies:
 - tuple
 - either
 - uuid
+- aeson
 - bytestring
 - string-conversions
 - rawstring-qm
@@ -56,6 +57,8 @@ dependencies:
 - scotty
 - wai
 - warp
+- http-client
+- req
 
 library:
   source-dirs: src
