@@ -29,7 +29,7 @@ application ctx@(_, config, _) = scottyAppT (runEnvIO ctx) router
 router :: ScottyT Text EnvM ()
 router = do
   get "/api" $ do
-    env <- lift $ asks environment
+    env <- lift $ asks env
     case env of
       Just Production -> sendError status404
       _               -> file "public/playground.html"

@@ -33,9 +33,9 @@ import           Data.Pool                      ( takeResource )
 type AppContext = (Maybe Environment, Config, Pool Connection)
 
 data Env = Env {
-  environment :: Maybe Environment,
-  config      :: Config,
-  conn        :: Connection
+  env    :: Maybe Environment,
+  config :: Config,
+  conn   :: Connection
 }
 
 newtype EnvM a
@@ -58,9 +58,9 @@ initialize = do
   return (env, config, pool)
 
 getEnv :: AppContext -> IO Env
-getEnv (environment, config, pool) = do
+getEnv (env, config, pool) = do
   (conn, _) <- takeResource pool
-  return Env { environment, conn, config }
+  return Env { env, conn, config }
 
 runEnvIO :: AppContext -> EnvM a -> IO a
 runEnvIO ctx m = do
