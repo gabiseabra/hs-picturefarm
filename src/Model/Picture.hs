@@ -58,18 +58,18 @@ data Picture = Picture {
 
 getPictureBy
   :: (ToField a)
-  => IndexedField
+  => Connection
+  -> IndexedField
   -> a
-  -> Connection
   -> IO (Either RecordError (Maybe Picture))
-getPictureBy field value conn = parseOne
+getPictureBy conn field value = parseOne
   $ queryNamed conn getPictureByQuery ["field" =? field, "value" =? value]
 
 ----------------------------------------------------------------------
 
 findPictures
-  :: FindPicturesInput -> Connection -> IO (Either RecordError [Picture])
-findPictures input@FindPicturesInput {..} conn =
+  :: Connection -> FindPicturesInput -> IO (Either RecordError [Picture])
+findPictures conn input@FindPicturesInput {..} =
   let PaginationParams {..} = parsePaginationInput pagination
   in  parseMany $ queryNamed
         conn

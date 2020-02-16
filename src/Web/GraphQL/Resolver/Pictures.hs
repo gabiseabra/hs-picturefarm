@@ -58,19 +58,19 @@ data PicturesInput = PicturesInput
 
 pictureResolver :: Connection -> PictureInput -> IORes e (Maybe Picture)
 pictureResolver conn PictureInput { fileName } =
-  liftEither . fmap mapOne $ getPictureBy FileName fileName conn
+  liftEither . fmap mapOne $ getPictureBy conn FileName fileName
 
 randomPictureResolver
   :: Connection -> RandomPictureInput -> IORes e (Maybe Picture)
 randomPictureResolver conn RandomPictureInput { tags } =
   let pagination = Just PaginationInput { page = Just 1, pageSize = Just 1 }
       input = def { tags, orderBy = Random, pagination } :: FindPicturesInput
-  in  liftEither . fmap (mapManyWith headZ) $ findPictures input conn
+  in  liftEither . fmap (mapManyWith headZ) $ findPictures conn input
 
 picturesResolver :: Connection -> PicturesInput -> IORes e [Picture]
 picturesResolver conn PicturesInput { tags, pagination } =
   let input = def { tags, pagination } :: FindPicturesInput
-  in  liftEither . fmap mapMany $ findPictures input conn
+  in  liftEither . fmap mapMany $ findPictures conn input
 
 ----------------------------------------------------------------------
 

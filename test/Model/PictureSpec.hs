@@ -58,17 +58,17 @@ spec :: Spec
 spec = setup $ do
   describe "getPictureBy" $ do
     it "returns one picture with valid uuid" $ \(conn, (actual_uuid : _)) -> do
-      getPictureBy UUID actual_uuid conn
+      getPictureBy conn UUID actual_uuid
         >>= (`shouldBeRightAnd` ((== Just actual_uuid) . liftM uuid))
 
     it "returns NotFound with invalid uuid" $ \(conn, _) -> do
       UUIDv4.nextRandom
-        >>= flip (getPictureBy UUID) conn
+        >>= getPictureBy conn UUID
         >>= (`shouldBeRightAnd` (== Nothing))
 
   describe "findPictures" $ do
     it "queries pictures with a given tag" $ \(conn, _) -> do
-      findPictures def { tags = Just ["a"] } conn
+      findPictures conn def { tags = Just ["a"] }
         >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test2.jpg"])
                                 . sort
                                 . map fileName
@@ -76,7 +76,7 @@ spec = setup $ do
             )
 
     it "queries pictures with any of the given tag" $ \(conn, _) -> do
-      findPictures def { tags = Just ["b", "c"] } conn
+      findPictures conn def { tags = Just ["b", "c"] }
         >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test3.jpg"])
                                 . sort
                                 . map fileName
@@ -85,37 +85,37 @@ spec = setup $ do
 
     it "orders results" $ \(conn, _) -> do
       desc <- findPictures
+        conn
         def { tags = Just ["a"], orderBy = OrderBy FileName DESC }
-        conn
       asc <- findPictures
-        def { tags = Just ["a"], orderBy = OrderBy FileName ASC }
         conn
+        def { tags = Just ["a"], orderBy = OrderBy FileName ASC }
       (mapIds desc) `shouldBe` (reverse $ mapIds asc)
 
     it "paginates results" $ \(conn, _) -> do
       findPictures
+          conn
           def
             { tags       = Just ["d"]
             , pagination =
               Just (PaginationInput { page = Nothing, pageSize = Just 2 })
             }
-          conn
         >>= (`shouldBeRightAnd` ((== 2) . length))
       findPictures
+          conn
           def
             { tags       = Just ["d"]
             , pagination =
               Just (PaginationInput { page = Just 2, pageSize = Just 2 })
             }
-          conn
         >>= (`shouldBeRightAnd` ((== 1) . length))
       findPictures
+          conn
           def
             { tags       = Just ["d"]
             , pagination =
               Just (PaginationInput { page = Just 3, pageSize = Just 2 })
             }
-          conn
         >>= (`shouldBeRightAnd` ((== 0) . length))
 
 main :: IO ()
