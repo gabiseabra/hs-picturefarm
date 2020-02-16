@@ -1,25 +1,25 @@
 module Service.CloudinarySpec where
 
 import           Spec.HttpCase
-import           Test.Hspec.Wai.JSON            ( json )
-import           Data.Aeson.QQ                  ( aesonQQ )
+
 import           Env
 import           Service.Cloudinary
+
+import           Data.Aeson.QQ                  ( aesonQQ )
 
 import           Control.Applicative
 
 import           Network.HTTP.Req               ( runReq
                                                 , responseBody
                                                 )
-import qualified Web.Scotty                    as Scotty
+import qualified Web.Scotty                    as S
 
 -- Tests
 ----------------------------------------------------------------------
 
 mockCloudinaryServer = do
-  Scotty.post "/api/v1/:name/upload" $ do
-    Scotty.json
-      [aesonQQ|{public_id: "test", format: "gif", resource_type: "image"}|]
+  S.post "/api/v1/:name/upload" $ do
+    S.json [aesonQQ|{public_id: "test", format: "gif", resource_type: "image"}|]
 
 setup :: SpecWith Config -> Spec
 setup = withMockServer mockCloudinaryServer . before (loadConfig (Just Test))
@@ -27,7 +27,7 @@ setup = withMockServer mockCloudinaryServer . before (loadConfig (Just Test))
 spec :: Spec
 spec = setup $ do
   describe "upload" $ do
-    it "uploads picture to cloudinary" $ \cfg -> do
+    it "uploads file on cloudinary" $ \cfg -> do
       r <- mockReq (upload cfg "test/fixtures/tiny.gif")
       (responseBody r) `shouldBe` CloudinaryResponse { public_id     = "test"
                                                      , format        = "gif"

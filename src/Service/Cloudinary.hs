@@ -1,7 +1,6 @@
 module Service.Cloudinary
   ( CloudinaryResponse(..)
   , upload
-  , upload'
   )
 where
 
@@ -28,11 +27,8 @@ data CloudinaryResponse  = CloudinaryResponse {
   resource_type :: String
 } deriving (Generic, FromJSON, Eq, Show)
 
-upload = upload' Production
-
-upload'
-  :: Environment -> Config -> FilePath -> Req (JsonResponse CloudinaryResponse)
-upload' env config fileName = do
+upload :: Config -> FilePath -> Req (JsonResponse CloudinaryResponse)
+upload config fileName = do
   let url     = uploadUrl config
       headers = buildHeaders config
   body <- buildReqBody config fileName

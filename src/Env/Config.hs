@@ -1,20 +1,25 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module Env.Config
   ( ConfigException(..)
   , Environment(..)
   , Config(..)
   , getEnvironment
   , loadConfig
+  , loadConfigWithDefaults
   )
 where
 
 import           GHC.Generics
 
-import           Control.Exception
-import           Control.Applicative
+import           Control.Exception              ( Exception
+                                                , throw
+                                                )
 
 import           LoadEnv                        ( loadEnvFrom )
 import           System.Envy                    ( FromEnv
                                                 , decodeEnv
+                                                , decodeWithDefaults
                                                 )
 import           System.Environment             ( lookupEnv )
 
@@ -60,9 +65,14 @@ envFileName (Just Development) = ".env.dev"
 envFileName _                  = ".env"
 
 loadConfig :: Maybe Environment -> IO Config
-loadConfig env = do
-  _   <- loadEnvFrom $ envFileName env
-  env <- decodeEnv :: IO (Either String Config)
-  case env of
+loadConfig = loadConfigWithDefaults Nothing
+
+loadConfigWithDefaults :: Maybe Config -> Maybe Environment -> IO Config
+loadConfigWithDefaults def env = do
+  _                               <- loadEnvFrom $ envFileName env
+  configE :: Either String Config <- case def of
+    Nothing     -> decodeEnv
+    Just config -> fmap Right $ decodeWithDefaults config
+  case configE of
     Left  err    -> throw (DecodeException err)
     Right config -> return config
