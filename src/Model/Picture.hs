@@ -4,6 +4,7 @@ module Model.Picture
   , Order(..)
   , IndexedField(..)
   , FindPicturesInput(..)
+  , insertPicture
   , getPictureBy
   , findPictures
   )
@@ -24,12 +25,14 @@ import           Data.Default.Class
 import           Data.Maybe
 import           Data.Text                      ( Text )
 import           Data.UUID                      ( UUID )
+import qualified Data.UUID                     as UUID
 import           Data.String.QM
 import           Data.Tuple.Curry               ( uncurryN )
 
 import           Database.PostgreSQL.Simple     ( Only(..)
                                                 , Connection
                                                 , fromOnly
+                                                , returning
                                                 , executeMany
                                                 )
 import           Database.PostgreSQL.Simple.ToField
@@ -45,7 +48,7 @@ import           PgNamed                        ( (=?)
 
 data Picture = Picture {
   id       :: Int,
-  uuid     :: UUID,
+  uuid     :: UUID.UUID,
   fileName :: Text,
   fileHash :: Text,
   url      :: Text,
@@ -56,18 +59,14 @@ data Picture = Picture {
 -- Queries
 ----------------------------------------------------------------------
 
-insertPicture :: Connection -> Picture -> IO UUID
+insertPicture :: Connection -> Picture -> IO (Int, UUID)
 insertPicture conn Picture {..} = do
-  uuid :: UUID <- liftM fromOnly . parseOne $ queryNamed
+  [(rid, uuid)] :: [(Int, UUID)] <- returning
     conn
     insertPictureQuery
-    [ "fileName" =? fileName
-    , "fileHash" =? fileHash
-    , "url" =? url
-    , "mimeType" =? mimeType
-    ]
+    [(fileName, fileHash, url, mimeType)]
   _ <- executeMany conn insertPictureTagQuery $ unnest uuid tags
-  return uuid
+  return (rid, uuid)
 
 unnest :: UUID -> [Text] -> [(UUID, Text)]
 unnest uuid tags = flip zip tags $ take (length tags) $ repeat uuid

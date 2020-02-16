@@ -5,9 +5,11 @@ import           Spec.ModelCase
 
 import           Model.Pagination
 import           Model.Picture
+import qualified Model.Picture                 as Pic
 
 import           Data.Default.Class
-import           Data.UUID
+import           Data.UUID                      ( UUID )
+import qualified Data.UUID                     as UUID
 import qualified Data.UUID.V4                  as UUIDv4
 import           Data.List
 import           Data.Text                      ( Text )
@@ -18,8 +20,21 @@ import           Control.Monad
 import           Control.Arrow
 import           Control.Composition
 
+import           Database.PostgreSQL.Simple     ( Only(..)
+                                                , query
+                                                )
+import           Database.PostgreSQL.Simple.SqlQQ
+
 -- Set up fixtures
 ----------------------------------------------------------------------
+
+newPic = Picture 0
+                 UUID.nil
+                 "test.jpg"
+                 (md5 "test")
+                 "test.jpg"
+                 "image/jpg"
+                 ["a", "b", "c"]
 
 pictures :: [PictureInput]
 pictures =
@@ -56,6 +71,15 @@ mapIds = (map uuid) . (fromRight [])
 
 spec :: Spec
 spec = setup $ do
+  describe "insertPicture" $ do
+    it "inserts a picture on the database" $ \(conn, _) -> do
+      (rid, uuid) <- insertPicture conn newPic
+      pic         <- getPictureBy conn UUID uuid
+      case pic of
+        Just pic -> pic `shouldBe` newPic { Pic.id = rid, uuid = uuid }
+        Nothing  -> expectationFailure "Picture was not inserted"
+
+
   describe "getPictureBy" $ do
     it "returns one picture with valid uuid" $ \(conn, (actual_uuid : _)) -> do
       getPictureBy conn UUID actual_uuid

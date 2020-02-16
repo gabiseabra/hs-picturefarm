@@ -68,7 +68,8 @@ tagsFilter = Filter
 insertPictureQuery :: Query
 insertPictureQuery = cs $ [qm|
     insert into pictures (file_name, file_hash, url, mime_type)
-    values (?fileName, ?fileHash, ?url, ?mimeType)
+    values (?, ?, ?, ?)
+    returning id, uuid
   |]
 
 insertPictureTagQuery :: Query

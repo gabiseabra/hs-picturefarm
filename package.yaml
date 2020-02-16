@@ -30,6 +30,7 @@ default-extensions:
 - DisambiguateRecordFields
 - DuplicateRecordFields
 - RecordWildCards
+- ScopedTypeVariables
 
 dependencies:
 - base >= 4.7 && < 5
@@ -61,6 +62,9 @@ dependencies:
 - http-client
 - req
 - optparse-applicative
+- xattr
+- cryptohash-md5
+- base16-bytestring
 
 library:
   source-dirs: src
@@ -97,7 +101,6 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - hs-picturefarm
-    - cryptohash-md5
     - aeson-qq
     - hspec
     - hspec-discover
