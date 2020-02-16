@@ -60,6 +60,7 @@ dependencies:
 - warp
 - http-client
 - req
+- optparse-applicative
 
 library:
   source-dirs: src
@@ -72,6 +73,15 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    dependencies:
+    - hs-picturefarm
+  hs-picturefarm-cli:
+    main:                Cli.hs
+    source-dirs:         app
+    ghc-options:
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -main-is Cli
     dependencies:
     - hs-picturefarm
 
