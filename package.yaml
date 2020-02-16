@@ -66,19 +66,21 @@ library:
   source-dirs: src
 
 executables:
-  hs-picturefarm-exe:
-    main:                Main.hs
+  hs-picturefarm-server:
+    main:                Server.hs
     source-dirs:         app
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -main-is Server
     dependencies:
     - hs-picturefarm
-  hs-picturefarm-cli:
+  hs-picturefarm:
     main:                Cli.hs
     source-dirs:         app
     ghc-options:
+    - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     - -main-is Cli

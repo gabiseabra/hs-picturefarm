@@ -1,4 +1,4 @@
-module Main where
+module Server where
 
 import qualified Web                           as Web
 
