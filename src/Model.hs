@@ -1,6 +1,7 @@
 module Model
   ( parseOne
   , parseMany
+  , maybeParseOne
   )
 where
 
@@ -17,6 +18,7 @@ import           Control.Error.Safe             ( headZ )
 
 import           Data.Typeable
 
+import           Database.PostgreSQL.Simple     ( FromRow(..) )
 import           Database.PostgreSQL.Simple.ToField
                                                 ( ToField(..) )
 import           Database.PostgreSQL.Simple.FromField
@@ -39,8 +41,11 @@ instance Exception PgNamedError
 -- Model helpers
 ----------------------------------------------------------------------
 
-parseOne :: (Exception e) => ExceptT e IO [a] -> IO (Maybe a)
-parseOne = return . headZ <=< parseMany
+maybeParseOne :: (Exception e) => ExceptT e IO [a] -> IO (Maybe a)
+maybeParseOne = return . headZ <=< parseMany
+
+parseOne :: (Exception e) => ExceptT e IO [a] -> IO a
+parseOne = return . head <=< parseMany
 
 parseMany :: (Exception e) => ExceptT e IO [a] -> IO [a]
 parseMany = either (liftIO . throwIO) pure <=< runExceptT

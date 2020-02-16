@@ -29,6 +29,8 @@ import           Data.Tuple.Curry               ( uncurryN )
 
 import           Database.PostgreSQL.Simple     ( Only(..)
                                                 , Connection
+                                                , fromOnly
+                                                , executeMany
                                                 )
 import           Database.PostgreSQL.Simple.ToField
                                                 ( ToField )
@@ -54,11 +56,30 @@ data Picture = Picture {
 -- Queries
 ----------------------------------------------------------------------
 
+insertPicture :: Connection -> Picture -> IO UUID
+insertPicture conn Picture {..} = do
+  uuid :: UUID <- liftM fromOnly . parseOne $ queryNamed
+    conn
+    insertPictureQuery
+    [ "fileName" =? fileName
+    , "fileHash" =? fileHash
+    , "url" =? url
+    , "mimeType" =? mimeType
+    ]
+  _ <- executeMany conn insertPictureTagQuery $ unnest uuid tags
+  return uuid
+
+unnest :: UUID -> [Text] -> [(UUID, Text)]
+unnest uuid tags = flip zip tags $ take (length tags) $ repeat uuid
+
+-- | Get picture by some unique field
+----------------------------------------------------------------------
 getPictureBy
   :: (ToField a) => Connection -> IndexedField -> a -> IO (Maybe Picture)
-getPictureBy conn field value = parseOne
+getPictureBy conn field value = maybeParseOne
   $ queryNamed conn getPictureByQuery ["field" =? field, "value" =? value]
 
+-- | Filter pictures
 ----------------------------------------------------------------------
 
 findPictures :: Connection -> FindPicturesInput -> IO [Picture]

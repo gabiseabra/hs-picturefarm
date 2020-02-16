@@ -65,6 +65,18 @@ tagsFilter = Filter
 -- Queries
 ----------------------------------------------------------------------
 
+insertPictureQuery :: Query
+insertPictureQuery = cs $ [qm|
+    insert into pictures (file_name, file_hash, url, mime_type)
+    values (?fileName, ?fileHash, ?url, ?mimeType)
+  |]
+
+insertPictureTagQuery :: Query
+insertPictureTagQuery = cs $ [qm|
+    insert into picture_tags (picture_uuid, tag)
+    values (?, ?)
+  |]
+
 getPictureByQuery :: Query
 getPictureByQuery = cs $ [qm|
     ${fromPictures}
