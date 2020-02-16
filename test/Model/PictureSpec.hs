@@ -59,29 +59,27 @@ spec = setup $ do
   describe "getPictureBy" $ do
     it "returns one picture with valid uuid" $ \(conn, (actual_uuid : _)) -> do
       getPictureBy conn UUID actual_uuid
-        >>= (`shouldBeRightAnd` ((== Just actual_uuid) . liftM uuid))
+        >>= (`shouldBe` Just actual_uuid)
+        .   (liftM uuid)
 
     it "returns NotFound with invalid uuid" $ \(conn, _) -> do
-      UUIDv4.nextRandom
-        >>= getPictureBy conn UUID
-        >>= (`shouldBeRightAnd` (== Nothing))
+      UUIDv4.nextRandom >>= getPictureBy conn UUID >>= (`shouldBe` Nothing)
 
   describe "findPictures" $ do
     it "queries pictures with a given tag" $ \(conn, _) -> do
       findPictures conn def { tags = Just ["a"] }
-        >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test2.jpg"])
-                                . sort
-                                . map fileName
-                                )
-            )
+        >>= (`shouldBe` ["test1.jpg", "test2.jpg"])
+        .   sort
+        .   map fileName
+
 
     it "queries pictures with any of the given tag" $ \(conn, _) -> do
       findPictures conn def { tags = Just ["b", "c"] }
-        >>= (`shouldBeRightAnd` ( (== ["test1.jpg", "test3.jpg"])
-                                . sort
-                                . map fileName
-                                )
-            )
+        >>= (`shouldBe` ["test1.jpg", "test3.jpg"])
+        .   sort
+        .   map fileName
+
+
 
     it "orders results" $ \(conn, _) -> do
       desc <- findPictures
@@ -90,7 +88,7 @@ spec = setup $ do
       asc <- findPictures
         conn
         def { tags = Just ["a"], orderBy = OrderBy FileName ASC }
-      (mapIds desc) `shouldBe` (reverse $ mapIds asc)
+      (map uuid desc) `shouldBe` (reverse $ map uuid asc)
 
     it "paginates results" $ \(conn, _) -> do
       findPictures
@@ -100,7 +98,8 @@ spec = setup $ do
             , pagination =
               Just (PaginationInput { page = Nothing, pageSize = Just 2 })
             }
-        >>= (`shouldBeRightAnd` ((== 2) . length))
+        >>= (`shouldBe` 2)
+        .   length
       findPictures
           conn
           def
@@ -108,7 +107,8 @@ spec = setup $ do
             , pagination =
               Just (PaginationInput { page = Just 2, pageSize = Just 2 })
             }
-        >>= (`shouldBeRightAnd` ((== 1) . length))
+        >>= (`shouldBe` 1)
+        .   length
       findPictures
           conn
           def
@@ -116,7 +116,8 @@ spec = setup $ do
             , pagination =
               Just (PaginationInput { page = Just 3, pageSize = Just 2 })
             }
-        >>= (`shouldBeRightAnd` ((== 0) . length))
+        >>= (`shouldBe` 0)
+        .   length
 
 main :: IO ()
 main = hspec $ spec

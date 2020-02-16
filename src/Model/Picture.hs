@@ -1,6 +1,5 @@
 module Model.Picture
-  ( RecordError(..)
-  , Picture(..)
+  ( Picture(..)
   , OrderBy(..)
   , Order(..)
   , IndexedField(..)
@@ -37,7 +36,6 @@ import           Database.PostgreSQL.Simple.FromRow
                                                 ( FromRow(..) )
 import           PgNamed                        ( (=?)
                                                 , queryNamed
-                                                , PgNamedError
                                                 )
 
 -- Schema
@@ -57,18 +55,13 @@ data Picture = Picture {
 ----------------------------------------------------------------------
 
 getPictureBy
-  :: (ToField a)
-  => Connection
-  -> IndexedField
-  -> a
-  -> IO (Either RecordError (Maybe Picture))
+  :: (ToField a) => Connection -> IndexedField -> a -> IO (Maybe Picture)
 getPictureBy conn field value = parseOne
   $ queryNamed conn getPictureByQuery ["field" =? field, "value" =? value]
 
 ----------------------------------------------------------------------
 
-findPictures
-  :: Connection -> FindPicturesInput -> IO (Either RecordError [Picture])
+findPictures :: Connection -> FindPicturesInput -> IO [Picture]
 findPictures conn input@FindPicturesInput {..} =
   let PaginationParams {..} = parsePaginationInput pagination
   in  parseMany $ queryNamed

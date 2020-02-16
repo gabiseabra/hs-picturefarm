@@ -11,23 +11,29 @@ where
 
 import           GHC.Generics
 
-import           Model.Picture           hiding ( Picture )
+import           Database.QueryBuilder
+import           Model.Picture                  ( FindPicturesInput(..)
+                                                , IndexedField(..)
+                                                , getPictureBy
+                                                , findPictures
+                                                )
 import qualified Model.Picture                 as DB
                                                 ( Picture(..) )
 import           Model.Pagination               ( PaginationInput(..) )
-import           Model                          ( RecordError )
 import           Env                            ( Connection )
 
 import           Data.Default.Class
-import           Data.Either.Combinators
-import           Data.UUID
+import           Data.Either.Combinators        ( mapBoth )
+import           Data.UUID                      ( UUID )
 import           Data.Text                      ( Text )
 import           Data.Morpheus.Kind
 import           Data.Morpheus.Types
 
+import           Control.Exception              ( SomeException
+                                                , Exception
+                                                , try
+                                                )
 import           Control.Error.Safe             ( headZ )
-import           Control.Monad.Trans.Class
-import           Control.Monad
 
 -- GraphQL types
 ----------------------------------------------------------------------
@@ -58,35 +64,35 @@ data PicturesInput = PicturesInput
 
 pictureResolver :: Connection -> PictureInput -> IORes e (Maybe Picture)
 pictureResolver conn PictureInput { fileName } =
-  liftEither . fmap mapOne $ getPictureBy conn FileName fileName
+  liftEither . fmap mapOne $ try $ getPictureBy conn FileName fileName
 
 randomPictureResolver
   :: Connection -> RandomPictureInput -> IORes e (Maybe Picture)
 randomPictureResolver conn RandomPictureInput { tags } =
   let pagination = Just PaginationInput { page = Just 1, pageSize = Just 1 }
       input = def { tags, orderBy = Random, pagination } :: FindPicturesInput
-  in  liftEither . fmap (mapManyWith headZ) $ findPictures conn input
+  in  liftEither . fmap (mapManyWith headZ) $ try $ findPictures conn input
 
 picturesResolver :: Connection -> PicturesInput -> IORes e [Picture]
 picturesResolver conn PicturesInput { tags, pagination } =
   let input = def { tags, pagination } :: FindPicturesInput
-  in  liftEither . fmap mapMany $ findPictures conn input
+  in  liftEither . fmap mapMany $ try $ findPictures conn input
 
 ----------------------------------------------------------------------
 
 mapOneWith
   :: (Maybe Picture -> a)
-  -> Either RecordError (Maybe DB.Picture)
+  -> Either SomeException (Maybe DB.Picture)
   -> Either String a
 mapOneWith = mapBoth show . (. transformM)
 
-mapOne = mapOneWith Prelude.id
+mapOne = mapOneWith id
 
 mapManyWith
-  :: ([Picture] -> a) -> Either RecordError [DB.Picture] -> Either String a
+  :: ([Picture] -> a) -> Either SomeException [DB.Picture] -> Either String a
 mapManyWith = mapBoth show . (. map transform)
 
-mapMany = mapManyWith Prelude.id
+mapMany = mapManyWith id
 
 transform :: DB.Picture -> Picture
 transform DB.Picture {..} = Picture { uuid, url, fileName, mimeType, tags }

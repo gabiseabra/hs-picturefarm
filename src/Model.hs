@@ -1,20 +1,20 @@
 module Model
-  ( RecordError(..)
-  , parseOne
+  ( parseOne
   , parseMany
   )
 where
 
-import           Control.Monad
+import           Control.Exception              ( Exception
+                                                , throwIO
+                                                )
+import           Control.Monad                  ( (<=<) )
+import           Control.Monad.Except           ( throwError )
 import           Control.Monad.Trans.Except     ( ExceptT
                                                 , runExceptT
                                                 )
-import           Control.Monad.IO.Class         ( MonadIO
-                                                , liftIO
-                                                )
+import           Control.Monad.IO.Class         ( liftIO )
 import           Control.Error.Safe             ( headZ )
 
-import           Data.Either.Combinators
 import           Data.Typeable
 
 import           Database.PostgreSQL.Simple.ToField
@@ -23,6 +23,7 @@ import           Database.PostgreSQL.Simple.FromField
                                                 ( FromField(..) )
 import           Database.PostgreSQL.Simple.Types
                                                 ( PGArray(..) )
+import           PgNamed                        ( PgNamedError )
 
 -- Generic PostgreSQL field parsers
 ----------------------------------------------------------------------
@@ -33,13 +34,13 @@ instance (ToField a) => ToField [a] where
 instance (FromField a, Typeable a) => FromField [a] where
   fromField f v = fromPGArray <$> fromField f v
 
+instance Exception PgNamedError
+
 -- Model helpers
 ----------------------------------------------------------------------
 
-data RecordError = RecordError String deriving (Show, Eq)
+parseOne :: (Exception e) => ExceptT e IO [a] -> IO (Maybe a)
+parseOne = return . headZ <=< parseMany
 
-parseOne :: (Show e) => ExceptT e IO [a] -> IO (Either RecordError (Maybe a))
-parseOne = fmap (mapRight headZ) . parseMany
-
-parseMany :: (Show e) => ExceptT e IO [a] -> IO (Either RecordError [a])
-parseMany = fmap (mapLeft $ RecordError . show) . runExceptT
+parseMany :: (Exception e) => ExceptT e IO [a] -> IO [a]
+parseMany = either (liftIO . throwIO) pure <=< runExceptT
