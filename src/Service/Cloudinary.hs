@@ -1,5 +1,6 @@
 module Service.Cloudinary
-  ( upload
+  ( CloudinaryResponse(..)
+  , upload
   , upload'
   )
 where
@@ -20,11 +21,12 @@ import           Network.HTTP.Client.MultipartFormData
                                                 ( partFileSource
                                                 , partBS
                                                 )
+
 data CloudinaryResponse  = CloudinaryResponse {
   public_id     :: String,
   format        :: String,
   resource_type :: String
-} deriving (Generic, FromJSON)
+} deriving (Generic, FromJSON, Eq, Show)
 
 upload = upload' Production
 

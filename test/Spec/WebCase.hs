@@ -44,7 +44,7 @@ import           Network.Wai.Test               ( SResponse )
 -- Hooks
 ----------------------------------------------------------------------
 
--- | Run block with application state for hspec-wai
+-- | Runs a spec with application state for hspec-wai
 withApplication :: IO st -> SpecWith (st, Application) -> Spec
 withApplication = withState . statefulApplication
 
@@ -63,6 +63,7 @@ setupContext = do
 setupApplication :: IO Application
 setupApplication = setupContext >>= application
 
+statefulApplication :: IO st -> IO (st, Application)
 statefulApplication = flip concurrently $ setupApplication
 
 ----------------------------------------------------------------------

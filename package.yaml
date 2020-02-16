@@ -36,6 +36,7 @@ dependencies:
 - composition-prelude
 - errors
 - mtl
+- monad-control
 - data-default-class
 - text
 - tuple
