@@ -36,11 +36,13 @@ dependencies:
 - composition-prelude
 - errors
 - mtl
+- monad-control
 - data-default-class
 - text
 - tuple
 - either
 - uuid
+- aeson
 - bytestring
 - string-conversions
 - rawstring-qm
@@ -56,6 +58,8 @@ dependencies:
 - scotty
 - wai
 - warp
+- http-client
+- req
 
 library:
   source-dirs: src
