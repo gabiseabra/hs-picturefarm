@@ -26,9 +26,12 @@ doUpload config file = do
   res <- runReq defaultHttpConfig (upload config file)
   print (responseBody res)
 
+-- Option parser
+--------------------------------------------------------------------------------
+
 prog :: ParserInfo (IO ())
 prog = info (main <$> parser) (progDesc "Upload files on cloudinary")
 
 parser :: Parser [FilePath]
-parser =
-  many (strArgument (metavar "FILENAME" <> help "Path of a file to upload"))
+parser = helper
+  <*> many (strArgument (metavar "TARGET" <> help "Path of a file to upload"))

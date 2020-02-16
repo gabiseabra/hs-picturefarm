@@ -12,4 +12,4 @@ prog :: ParserInfo (IO ())
 prog = info parser idm
 
 parser :: Parser (IO ())
-parser = subparser (command "upload" Upload.prog)
+parser = helper <*> subparser (command "upload" Upload.prog)
