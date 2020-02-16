@@ -11,7 +11,8 @@ testConfig = testConfigWithDefaults
                , port            = 4020
                , cdnCloudName    = "test"
                , cdnUploadPreset = "test"
-               , cdnCredentials  = "test"
+               , cdnApiKey       = "test"
+               , cdnApiToken     = "test"
                }
   )
 

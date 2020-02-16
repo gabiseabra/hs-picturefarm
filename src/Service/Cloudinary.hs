@@ -40,9 +40,12 @@ buildReqBody Config { cdnUploadPreset } fileName = reqBodyMultipart
   , partBS "resource_type" "auto"
   ]
 
-buildHeaders Config { cdnCredentials } =
-  header "Authorization" (cs cdnCredentials)
-    <> header "Content-Type" "application/json"
+buildHeaders Config { cdnApiKey, cdnApiSecret } =
+  basicAuth (cs cdnApiKey) (cs cdnApiSecret)
 
 uploadUrl Config { cdnCloudName } =
-  https "api.cloudinary.com" /: "api" /: "v1" /: (cs cdnCloudName) /: "upload"
+  https "api.cloudinary.com"
+    /: "v1_1"
+    /: (cs cdnCloudName)
+    /: "image"
+    /: "upload"

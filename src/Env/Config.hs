@@ -42,7 +42,8 @@ data Config = Config {
   databaseUrl     :: String,
   cdnCloudName    :: String,
   cdnUploadPreset :: String,
-  cdnCredentials  :: String
+  cdnApiKey       :: String,
+  cdnApiSecret    :: String
 } deriving (Generic, Show)
 
 instance FromEnv Config
