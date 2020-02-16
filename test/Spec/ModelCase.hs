@@ -19,6 +19,14 @@ import           Model.Picture
 import           Data.UUID
 import           Data.Text                      ( Text )
 
+import           Database.PostgreSQL.Simple     ( Connection
+                                                , returning
+                                                , fromOnly
+                                                , executeMany
+                                                , execute_
+                                                )
+import           Database.PostgreSQL.Simple.SqlQQ
+
 type PictureInput = (Text, Text, Text, Text)
 
 type PictureTagInput = (UUID, [Text])

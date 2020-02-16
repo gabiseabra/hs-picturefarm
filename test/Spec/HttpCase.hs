@@ -46,7 +46,7 @@ mockServer s = do
 
 -- | Gets mock server port from env
 getPort :: IO Int
-getPort = lookupEnv "MOCK_SERVER_PORT" >>= return . read . fromMaybe "4020"
+getPort = lookupEnv "MOCK_SERVER_PORT" >>= return . read . fromMaybe "4021"
 
 -- Hooks
 ----------------------------------------------------------------------

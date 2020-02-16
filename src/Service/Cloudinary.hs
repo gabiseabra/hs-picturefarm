@@ -34,12 +34,11 @@ upload config fileName = do
   body <- buildReqBody config fileName
   req POST url body jsonResponse headers
 
-buildReqBody Config { cdnUploadPreset } fileName =
-  reqBodyMultipart
-    $ [ partFileSource "file" fileName
-      , partBS "upload_preset" (cs cdnUploadPreset)
-      , partBS "resource_type" "auto"
-      ]
+buildReqBody Config { cdnUploadPreset } fileName = reqBodyMultipart
+  [ partFileSource "file" fileName
+  , partBS "upload_preset" (cs cdnUploadPreset)
+  , partBS "resource_type" "auto"
+  ]
 
 buildHeaders Config { cdnCredentials } =
   header "Authorization" (cs cdnCredentials)

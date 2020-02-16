@@ -17,9 +17,11 @@ import           Env.Connection
 import           Web.Router                     ( application )
 import           Spec.TestCase
 
-import           Test.Hspec.Wai          hiding ( pending
-                                                , pendingWith
-                                                , withApplication
+import           Test.Hspec.Wai                 ( WaiSession
+                                                , withState
+                                                , post
+                                                , matchBody
+                                                , shouldRespondWith
                                                 )
 import           Test.Hspec.Wai.Matcher         ( Body
                                                 , MatchBody(..)
