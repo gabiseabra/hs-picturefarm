@@ -14,8 +14,8 @@ import           Network.HTTP.Req               ( runReq
                                                 )
 import qualified Web.Scotty                    as S
 
--- Tests
-----------------------------------------------------------------------
+-- Set up
+--------------------------------------------------------------------------------
 
 mockCloudinaryServer = do
   S.post "/api/v1/:name/upload" $ do
@@ -23,6 +23,9 @@ mockCloudinaryServer = do
 
 setup :: SpecWith Config -> Spec
 setup = withMockServer mockCloudinaryServer . before (loadConfig (Just Test))
+
+-- Tests
+--------------------------------------------------------------------------------
 
 spec :: Spec
 spec = setup $ do
