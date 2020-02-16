@@ -19,12 +19,13 @@ import           Database.PostgreSQL.Simple.ToField
 
 type PictureFields = (Int, UUID, Text, Text, Text, Text, [Text])
 
-data IndexedField = ID | UUID | FileName
+data IndexedField = ID | UUID | FileName | FileHash
 
 instance Show IndexedField where
   show ID       = "id"
   show UUID     = "uuid"
   show FileName = "file_name"
+  show FileHash = "file_hash"
 
 instance ToField IndexedField where
   toField = Plain . string8 . show

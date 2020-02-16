@@ -22,9 +22,9 @@ import           Network.HTTP.Client.MultipartFormData
                                                 )
 
 data CloudinaryResponse  = CloudinaryResponse {
-  public_id     :: String,
-  format        :: String,
-  resource_type :: String
+  public_id     :: T.Text,
+  format        :: T.Text,
+  resource_type :: T.Text
 } deriving (Generic, FromJSON, Eq, Show)
 
 upload :: Config -> FilePath -> Req (JsonResponse CloudinaryResponse)

@@ -12,6 +12,8 @@ where
 import           GHC.Generics
 
 import qualified Data.List                     as List
+import qualified Data.ByteString               as BS
+import           Data.UUID                      ( UUID )
 import           Data.String                    ( IsString(..) )
 import           Data.String.Conversions        ( ConvertibleStrings(..) )
 import           Data.ByteString.Builder        ( string8 )
@@ -27,6 +29,12 @@ import           Database.PostgreSQL.Simple.ToField
 
 instance ConvertibleStrings String Query where
   convertString = fromString
+
+instance ConvertibleStrings UUID String where
+  convertString = show
+
+instance ConvertibleStrings UUID BS.ByteString where
+  convertString = convertString . show
 
 -- Query builders
 ----------------------------------------------------------------------

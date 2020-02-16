@@ -65,6 +65,7 @@ dependencies:
 - xattr
 - cryptohash-md5
 - base16-bytestring
+- filepath
 
 library:
   source-dirs: src

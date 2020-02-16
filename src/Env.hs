@@ -8,6 +8,7 @@ module Env
   , Env(..)
   , EnvM(..)
   , initialize
+  , getEnv
   , runEnvIO
   )
 where
