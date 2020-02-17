@@ -64,8 +64,10 @@ dependencies:
 - optparse-applicative
 - xattr
 - cryptohash-md5
+- cryptohash-sha1
 - base16-bytestring
 - filepath
+- time
 
 library:
   source-dirs: src

@@ -5,6 +5,7 @@ import           Spec.HttpCase
 import           Env
 import           Service.Cloudinary
 
+import           Data.Default.Class
 import           Data.Aeson.QQ                  ( aesonQQ )
 
 import           Control.Applicative
@@ -17,12 +18,19 @@ import qualified Web.Scotty                    as S
 -- Set up
 --------------------------------------------------------------------------------
 
+cfg :: Config
+cfg = def { cdnCloudName    = "test"
+          , cdnUploadPreset = "test"
+          , cdnApiSecret    = "test"
+          , cdnApiKey       = "test"
+          }
+
 mockCloudinaryServer = do
-  S.post "/api/v1/:name/upload" $ do
+  S.post "/v1_1/test/image/upload" $ do
     S.json [aesonQQ|{public_id: "test", format: "gif", resource_type: "image"}|]
 
-setup :: SpecWith Config -> Spec
-setup = withMockServer mockCloudinaryServer . before (loadConfig (Just Test))
+setup :: SpecWith () -> Spec
+setup = withMockServer mockCloudinaryServer
 
 -- Tests
 --------------------------------------------------------------------------------
@@ -30,7 +38,7 @@ setup = withMockServer mockCloudinaryServer . before (loadConfig (Just Test))
 spec :: Spec
 spec = setup $ do
   describe "upload" $ do
-    it "uploads file on cloudinary" $ \cfg -> do
+    it "uploads file on cloudinary" $ do
       r <- mockReq (upload cfg "test/fixtures/tiny.gif")
       (responseBody r) `shouldBe` CloudinaryResponse { public_id     = "test"
                                                      , format        = "gif"

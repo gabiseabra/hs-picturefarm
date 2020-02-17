@@ -12,6 +12,8 @@ where
 
 import           GHC.Generics
 
+import           Data.Default.Class
+
 import           Control.Exception              ( Exception
                                                 , throw
                                                 )
@@ -47,6 +49,18 @@ data Config = Config {
 } deriving (Generic, Show)
 
 instance FromEnv Config
+
+instance Default Config where
+  def = Config
+    { port            = 4000
+    , databaseUrl     =
+      "postgres://postgres:postgres@localhost:5432/picturefarm_dev?"
+        <> "sslmode=disable"
+    , cdnCloudName    = ""
+    , cdnUploadPreset = ""
+    , cdnApiKey       = ""
+    , cdnApiSecret    = ""
+    }
 
 -- Config methods
 ----------------------------------------------------------------------
