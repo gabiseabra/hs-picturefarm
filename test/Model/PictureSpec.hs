@@ -84,18 +84,18 @@ spec = setup $ do
       picM <- getPictureBy conn UUID uuid
       case picM of
         Just pic -> do
-          let nextPic = pic { fileName = "eyy.lmao" }
+          let nextPic = pic { fileName = "eyy.lmao", tags = ["x"] }
           updatePicture conn nextPic
           getPictureBy conn UUID uuid >>= (`shouldBe` Just nextPic)
         Nothing -> expectationFailure "Inserted picture was not found"
 
   describe "getPictureBy" $ do
     it "returns one picture with valid uuid" $ \(conn, (actual_uuid : _)) -> do
-      getPictureBy conn UUID actual_uuid
-        >>= (`shouldBe` Just actual_uuid)
-        .   (liftM uuid)
+      getPictureBy conn UUID actual_uuid >>= maybe
+        (expectationFailure "Picture was not found")
+        ((`shouldBe` actual_uuid) . uuid)
 
-    it "returns NotFound with invalid uuid" $ \(conn, _) -> do
+    it "returns Nothing with invalid uuid" $ \(conn, _) -> do
       UUIDv4.nextRandom >>= getPictureBy conn UUID >>= (`shouldBe` Nothing)
 
   describe "findPictures" $ do

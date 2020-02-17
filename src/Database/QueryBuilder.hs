@@ -14,6 +14,7 @@ import           GHC.Generics
 import qualified Data.List                     as List
 import qualified Data.ByteString               as BS
 import           Data.UUID                      ( UUID )
+import qualified Data.UUID                     as UUID
 import           Data.String                    ( IsString(..) )
 import           Data.String.Conversions        ( ConvertibleStrings(..) )
 import           Data.ByteString.Builder        ( string8 )
@@ -31,10 +32,10 @@ instance ConvertibleStrings String Query where
   convertString = fromString
 
 instance ConvertibleStrings UUID String where
-  convertString = show
+  convertString = UUID.toString
 
 instance ConvertibleStrings UUID BS.ByteString where
-  convertString = convertString . show
+  convertString = convertString . UUID.toString
 
 -- Query builders
 ----------------------------------------------------------------------

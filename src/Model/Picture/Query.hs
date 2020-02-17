@@ -37,9 +37,9 @@ fromPictures = [qq|
        , p.file_hash
        , p.url
        , p.mime_type
-       , array_agg(pt.tag)
+       , array_remove(array_agg(pt.tag), NULL)
   from pictures p
-  inner join picture_tags pt on pt.picture_uuid = p.uuid
+  left join picture_tags pt on pt.picture_uuid = p.uuid
   |]
 
 -- Filters
