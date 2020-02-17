@@ -1,0 +1,3 @@
+#!/bin/bash
+
+STACK_ENV=prod hs-picturefarm upload $@
