@@ -9,6 +9,7 @@ module Env
   , EnvM(..)
   , initialize
   , initializeWithDefaults
+  , withEnv
   , getEnv
   , runEnvIO
   )
@@ -67,6 +68,9 @@ getEnv :: AppContext -> IO Env
 getEnv (env, config, pool) = do
   (conn, _) <- takeResource pool
   return Env { env, conn, config }
+
+withEnv :: AppContext -> (Env -> IO a) -> IO a
+withEnv ctx fn = getEnv ctx >>= fn
 
 runEnvIO :: AppContext -> EnvM a -> IO a
 runEnvIO ctx m = do

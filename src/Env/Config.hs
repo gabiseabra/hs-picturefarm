@@ -39,14 +39,15 @@ instance Exception ConfigException
 
 data Environment = Production | Development | Test
 
-data Config = Config {
-  port            :: Int,
-  databaseUrl     :: String,
-  cdnCloudName    :: String,
-  cdnUploadPreset :: String,
-  cdnApiKey       :: String,
-  cdnApiSecret    :: String
-} deriving (Generic, Show)
+data Config = Config
+  { port            :: Int
+  , databaseUrl     :: String
+  , cdnCloudName    :: String
+  , cdnUploadPreset :: String
+  , cdnApiKey       :: String
+  , cdnApiSecret    :: String
+  , slackToken      :: String
+  } deriving (Generic, Show)
 
 instance FromEnv Config
 
@@ -60,6 +61,7 @@ instance Default Config where
     , cdnUploadPreset = ""
     , cdnApiKey       = ""
     , cdnApiSecret    = ""
+    , slackToken      = ""
     }
 
 -- Config methods
