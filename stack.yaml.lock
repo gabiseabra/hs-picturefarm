@@ -53,6 +53,13 @@ packages:
       sha256: 1ecfeb4b1367de6b489dbda20be05df78beb07f71d7c0b1f471fab1cd9c8044a
   original:
     hackage: command-0.1.1
+- completed:
+    hackage: linklater-4.0.0.2@sha256:c4d21b2ed782b6ca5fa69cdca244d60c2470cd82bf2ddd620e3e948619745609,1719
+    pantry-tree:
+      size: 369
+      sha256: 54b9af4f1c3ff19cd98de64c7fb1ce2a98e9bf5c23654bea4c9393c3b46e6442
+  original:
+    hackage: linklater-4.0.0.2
 snapshots:
 - completed:
     size: 524164

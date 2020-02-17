@@ -61,6 +61,7 @@ dependencies:
 - warp
 - http-client
 - req
+- linklater
 - optparse-applicative
 - xattr
 - command
