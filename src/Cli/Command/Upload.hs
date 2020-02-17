@@ -28,7 +28,6 @@ import           Control.Monad                  ( void )
 import           Options.Applicative
 
 import           System.FilePath.Posix          ( takeFileName )
-
 import           Network.HTTP.Req               ( runReq
                                                 , defaultHttpConfig
                                                 , responseBody

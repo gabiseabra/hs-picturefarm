@@ -75,9 +75,9 @@ getEnvironment = do
     _           -> return Nothing
 
 envFileName :: Maybe Environment -> String
-envFileName (Just Test       ) = ".env.test"
-envFileName (Just Development) = ".env.dev"
-envFileName _                  = ".env"
+envFileName (Just Production) = ".env"
+envFileName (Just Test      ) = ".env.test"
+envFileName _                 = ".env.dev"
 
 loadConfig :: Maybe Environment -> IO Config
 loadConfig = loadConfigWithDefaults Nothing
