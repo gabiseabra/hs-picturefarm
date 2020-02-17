@@ -1,4 +1,4 @@
-module Web
+module Web.Server
   ( main
   )
 where
