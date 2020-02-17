@@ -63,9 +63,12 @@ dependencies:
 - req
 - optparse-applicative
 - xattr
+- command
 - cryptohash-md5
 - cryptohash-sha1
+- utf8-string
 - base16-bytestring
+- split
 - filepath
 - time
 

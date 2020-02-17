@@ -12,36 +12,22 @@ import           Service.Cloudinary             ( CloudinaryResponse(..) )
 import qualified Service.Cloudinary            as CDN
 import           Model.Picture                  ( Picture(..) )
 import qualified Model.Picture                 as Pic
+import           System.IO.MetaData
 
 import           Foreign.C.Error                ( Errno )
 
-import qualified Crypto.Hash.MD5               as MD5
 import           Data.Either.Combinators        ( rightToMaybe )
 import           Data.Maybe                     ( maybe
                                                 , fromMaybe
                                                 )
 import           Data.UUID                      ( UUID )
 import qualified Data.UUID                     as UUID
-import qualified Data.ByteString.Char8         as BS
-import qualified Data.ByteString.Lazy.Char8    as BSL
-import qualified Data.ByteString.Base16        as BS16
-import qualified Data.Text                     as T
 import           Data.String.Conversions        ( cs )
 
-import           Control.Monad                  ( void
-                                                , guard
-                                                , liftM
-                                                )
-import           Control.Exception              ( tryJust
-                                                , catch
-                                                )
+import           Control.Monad                  ( void )
 import           Options.Applicative
 
 import           System.FilePath.Posix          ( takeFileName )
-import           System.Xattr                   ( XattrMode(..)
-                                                , getxattr
-                                                , setxattr
-                                                )
 
 import           Network.HTTP.Req               ( runReq
                                                 , defaultHttpConfig
@@ -71,14 +57,15 @@ processFile env file = do
 insertPicture :: Env -> FilePath -> IO Picture
 insertPicture Env { conn, config } file = do
   fileHash <- md5Digest file
+  tags     <- getxattrTags file
   res      <- runReq defaultHttpConfig (responseBody <$> CDN.upload config file)
   let pic = Picture { id       = 0
                     , uuid     = UUID.nil
+                    , tags
                     , fileHash
                     , fileName = (cs $ takeFileName file)
                     , url      = public_id res <> "." <> format res
                     , mimeType = resource_type res <> "/" <> format res
-                    , tags     = []
                     }
   (rid, uuid) <- Pic.insertPicture conn pic
   _           <- setxattrUUID file uuid
@@ -89,7 +76,10 @@ insertPicture Env { conn, config } file = do
 uploadPicture :: Env -> FilePath -> Picture -> IO ()
 uploadPicture Env { conn } file pic = do
   fileHash <- md5Digest file
-  Pic.updatePicture conn pic { fileHash, fileName = (cs $ takeFileName file) }
+  tags     <- getxattrTags file
+  Pic.updatePicture
+    conn
+    pic { tags, fileHash, fileName = (cs $ takeFileName file) }
 
 -- | Try to match a FilePath to one picture on the database
 --------------------------------------------------------------------------------
@@ -106,21 +96,6 @@ getByFileHash Env { conn } file =
 getByUUID :: Env -> FilePath -> IO (Maybe Picture)
 getByUUID Env { conn } file =
   getxattrUUID file >>= maybe (return Nothing) (Pic.getPictureBy conn Pic.UUID)
-
--- File attr helpers
---------------------------------------------------------------------------------
-
-getxattrUUID :: FilePath -> IO (Maybe UUID)
-getxattrUUID file =
-  catch (getxattr file "picturefarm-uuid") (\(_ :: IOError) -> return "")
-    >>= return
-    .   UUID.fromASCIIBytes
-
-setxattrUUID :: FilePath -> UUID -> IO ()
-setxattrUUID file uuid = setxattr file "picturefarm-uuid" (cs uuid) RegularMode
-
-md5Digest :: FilePath -> IO T.Text
-md5Digest = liftM (cs . BS16.encode . MD5.hash) . BS.readFile
 
 -- Option parser
 --------------------------------------------------------------------------------
