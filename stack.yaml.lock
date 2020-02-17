@@ -39,6 +39,20 @@ packages:
       sha256: 17af1c2e709cd84bfda066b9ebb04cdde7f92660c51a1f7401a1e9f766524e93
   original:
     hackage: hspec-wai-0.10.1
+- completed:
+    hackage: xattr-0.6.2@sha256:70e9cd15431bbcf4931c1cf9d9accf322a4b4844be361e0dbb016b2884827d45,1509
+    pantry-tree:
+      size: 606
+      sha256: bbffa2dbd63d81582e669043d73031de05c0463d3ad2fce551636914c5ea291c
+  original:
+    hackage: xattr-0.6.2
+- completed:
+    hackage: command-0.1.1@sha256:5232b98c195bc3b8a6f35c55ccd2fa424abe355ca54cfcd836bbe7e494834773,1110
+    pantry-tree:
+      size: 167
+      sha256: 1ecfeb4b1367de6b489dbda20be05df78beb07f71d7c0b1f471fab1cd9c8044a
+  original:
+    hackage: command-0.1.1
 snapshots:
 - completed:
     size: 524164

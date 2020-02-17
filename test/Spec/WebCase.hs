@@ -13,7 +13,6 @@ module Spec.WebCase
 where
 
 import           Env
-import           Env.Connection
 import           Web.Router                     ( application )
 import           Spec.TestCase
 
@@ -36,6 +35,7 @@ import           Data.ByteString.Lazy           ( ByteString
                                                 , toStrict
                                                 )
 import           Data.String.Conversions        ( cs )
+import           Data.Default.Class
 
 import           Control.Concurrent.Async       ( concurrently )
 import           Control.Monad.IO.Class         ( liftIO )
@@ -58,7 +58,7 @@ aroundApplication action = around $ \inner -> do
 
 setupContext :: IO AppContext
 setupContext = do
-  config <- loadConfig (Just Test)
+  config <- loadConfigWithDefaults (Just def) (Just Test)
   pool   <- createConnectionPool config
   return (Just Test, config, pool)
 

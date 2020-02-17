@@ -8,6 +8,8 @@ module Env
   , Env(..)
   , EnvM(..)
   , initialize
+  , initializeWithDefaults
+  , getEnv
   , runEnvIO
   )
 where
@@ -50,10 +52,14 @@ newtype EnvM a
 
 ----------------------------------------------------------------------
 
-initialize :: IO AppContext
-initialize = do
+initialize = initializeWithDefaults' Nothing
+
+initializeWithDefaults = initializeWithDefaults' . Just
+
+initializeWithDefaults' :: Maybe Config -> IO AppContext
+initializeWithDefaults' defConfig = do
   env    <- getEnvironment
-  config <- loadConfig env
+  config <- loadConfigWithDefaults defConfig env
   pool   <- createConnectionPool config
   return (env, config, pool)
 

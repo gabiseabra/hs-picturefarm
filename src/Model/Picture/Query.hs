@@ -19,12 +19,13 @@ import           Database.PostgreSQL.Simple.ToField
 
 type PictureFields = (Int, UUID, Text, Text, Text, Text, [Text])
 
-data IndexedField = ID | UUID | FileName
+data IndexedField = ID | UUID | FileName | FileHash
 
 instance Show IndexedField where
   show ID       = "id"
   show UUID     = "uuid"
   show FileName = "file_name"
+  show FileHash = "file_hash"
 
 instance ToField IndexedField where
   toField = Plain . string8 . show
@@ -36,9 +37,9 @@ fromPictures = [qq|
        , p.file_hash
        , p.url
        , p.mime_type
-       , array_agg(pt.tag)
+       , array_remove(array_agg(pt.tag), NULL)
   from pictures p
-  inner join picture_tags pt on pt.picture_uuid = p.uuid
+  left join picture_tags pt on pt.picture_uuid = p.uuid
   |]
 
 -- Filters
@@ -64,6 +65,34 @@ tagsFilter = Filter
 
 -- Queries
 ----------------------------------------------------------------------
+
+insertPictureQuery :: Query
+insertPictureQuery = cs $ [qm|
+    insert into pictures (file_name, file_hash, url, mime_type)
+    values (?, ?, ?, ?)
+    returning id, uuid
+  |]
+
+updatePictureQuery :: Query
+updatePictureQuery = cs $ [qm|
+    update pictures
+    set file_name = ?
+      , file_hash = ?
+      , url       = ?
+      , mime_type = ?
+    where uuid = ?
+  |]
+
+deletePictureTagsQuery :: Query
+deletePictureTagsQuery = cs $ [qm|
+  delete from picture_tags where picture_uuid = ?
+|]
+
+insertPictureTagQuery :: Query
+insertPictureTagQuery = cs $ [qm|
+    insert into picture_tags (picture_uuid, tag)
+    values (?, ?)
+  |]
 
 getPictureByQuery :: Query
 getPictureByQuery = cs $ [qm|
