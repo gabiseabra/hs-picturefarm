@@ -5,6 +5,7 @@ module Model.Picture
   , IndexedField(..)
   , FindPicturesInput(..)
   , insertPicture
+  , updatePicture
   , getPictureBy
   , findPictures
   )
@@ -33,7 +34,9 @@ import           Database.PostgreSQL.Simple     ( Only(..)
                                                 , Connection
                                                 , fromOnly
                                                 , returning
+                                                , execute
                                                 , executeMany
+                                                , withTransaction
                                                 )
 import           Database.PostgreSQL.Simple.ToField
                                                 ( ToField )
@@ -67,6 +70,13 @@ insertPicture conn Picture {..} = do
     [(fileName, fileHash, url, mimeType)]
   _ <- executeMany conn insertPictureTagQuery $ unnest uuid tags
   return (rid, uuid)
+
+updatePicture :: Connection -> Picture -> IO ()
+updatePicture conn Picture {..} = withTransaction conn $ do
+  execute conn updatePictureQuery     (fileName, fileHash, url, mimeType, uuid)
+  execute conn deletePictureTagsQuery (Only uuid)
+  executeMany conn insertPictureTagQuery $ unnest uuid tags
+  return ()
 
 unnest :: UUID -> [Text] -> [(UUID, Text)]
 unnest uuid tags = flip zip tags $ take (length tags) $ repeat uuid

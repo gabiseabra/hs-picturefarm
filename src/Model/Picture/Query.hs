@@ -73,6 +73,21 @@ insertPictureQuery = cs $ [qm|
     returning id, uuid
   |]
 
+updatePictureQuery :: Query
+updatePictureQuery = cs $ [qm|
+    update pictures
+    set file_name = ?
+      , file_hash = ?
+      , url       = ?
+      , mime_type = ?
+    where uuid = ?
+  |]
+
+deletePictureTagsQuery :: Query
+deletePictureTagsQuery = cs $ [qm|
+  delete from picture_tags where picture_uuid = ?
+|]
+
 insertPictureTagQuery :: Query
 insertPictureTagQuery = cs $ [qm|
     insert into picture_tags (picture_uuid, tag)

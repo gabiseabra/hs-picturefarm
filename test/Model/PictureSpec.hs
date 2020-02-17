@@ -79,6 +79,15 @@ spec = setup $ do
         Just pic -> pic `shouldBe` newPic { Pic.id = rid, uuid = uuid }
         Nothing  -> expectationFailure "Picture was not inserted"
 
+  describe "updatePicture" $ do
+    it "updates a picture on the database" $ \(conn, (uuid : _)) -> do
+      picM <- getPictureBy conn UUID uuid
+      case picM of
+        Just pic -> do
+          let nextPic = pic { fileName = "eyy.lmao" }
+          updatePicture conn nextPic
+          getPictureBy conn UUID uuid >>= (`shouldBe` Just nextPic)
+        Nothing -> expectationFailure "Inserted picture was not found"
 
   describe "getPictureBy" $ do
     it "returns one picture with valid uuid" $ \(conn, (actual_uuid : _)) -> do
