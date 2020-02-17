@@ -23,6 +23,7 @@ import           Data.Maybe                     ( maybe
 import           Data.UUID                      ( UUID )
 import qualified Data.UUID                     as UUID
 import qualified Data.ByteString.Char8         as BS
+import qualified Data.ByteString.Lazy.Char8    as BSL
 import qualified Data.ByteString.Base16        as BS16
 import qualified Data.Text                     as T
 import           Data.String.Conversions        ( cs )
@@ -61,9 +62,12 @@ processFile env file = do
     Nothing -> do
       Picture { uuid, fileName } <- insertPicture env file
       putStrLn $ "[" ++ (show uuid) ++ "] Inserted " ++ (cs fileName)
-    Just pic -> return ()
+    Just pic@Picture { uuid, fileName } -> do
+      uploadPicture env file pic
+      putStr $ "[" ++ (show uuid) ++ "] Updated " ++ (cs fileName)
 
 -- | Upload and insert a new picture to the database
+--------------------------------------------------------------------------------
 insertPicture :: Env -> FilePath -> IO Picture
 insertPicture Env { conn, config } file = do
   fileHash <- md5Digest file
@@ -72,13 +76,20 @@ insertPicture Env { conn, config } file = do
                     , uuid     = UUID.nil
                     , fileHash
                     , fileName = (cs $ takeFileName file)
-                    , url      = (public_id res) <> (format res)
-                    , mimeType = resource_type res
+                    , url      = public_id res <> "." <> format res
+                    , mimeType = resource_type res <> "/" <> format res
                     , tags     = []
                     }
   (rid, uuid) <- Pic.insertPicture conn pic
   _           <- setxattrUUID file uuid
   return pic { Pic.id = rid, uuid }
+
+-- | Updates picture attributes
+--------------------------------------------------------------------------------
+uploadPicture :: Env -> FilePath -> Picture -> IO ()
+uploadPicture Env { conn } file pic = do
+  fileHash <- md5Digest file
+  Pic.updatePicture conn pic { fileHash, fileName = (cs $ takeFileName file) }
 
 -- | Try to match a FilePath to one picture on the database
 --------------------------------------------------------------------------------
@@ -103,8 +114,7 @@ getxattrUUID :: FilePath -> IO (Maybe UUID)
 getxattrUUID file =
   catch (getxattr file "picturefarm-uuid") (\(_ :: IOError) -> return "")
     >>= return
-    .   UUID.fromByteString
-    .   cs
+    .   UUID.fromASCIIBytes
 
 setxattrUUID :: FilePath -> UUID -> IO ()
 setxattrUUID file uuid = setxattr file "picturefarm-uuid" (cs uuid) RegularMode
