@@ -28,6 +28,7 @@ import           Control.Monad                  ( void )
 import           Options.Applicative
 
 import           System.FilePath.Posix          ( takeFileName )
+import           Network.Mime                   ( defaultMimeLookup )
 import           Network.HTTP.Req               ( runReq
                                                 , defaultHttpConfig
                                                 , responseBody
@@ -49,7 +50,7 @@ processFile env file = do
       putStrLn $ "[" ++ (show uuid) ++ "] Inserted " ++ (cs fileName)
     Just pic@Picture { uuid, fileName } -> do
       uploadPicture env file pic
-      putStr $ "[" ++ (show uuid) ++ "] Updated " ++ (cs fileName)
+      putStrLn $ "[" ++ (show uuid) ++ "] Updated " ++ (cs fileName)
 
 -- | Upload and insert a new picture to the database
 --------------------------------------------------------------------------------
@@ -64,7 +65,7 @@ insertPicture Env { conn, config } file = do
                     , fileHash
                     , fileName = (cs $ takeFileName file)
                     , url      = public_id res <> "." <> format res
-                    , mimeType = resource_type res <> "/" <> format res
+                    , mimeType = (cs . defaultMimeLookup . cs $ file)
                     }
   (rid, uuid) <- Pic.insertPicture conn pic
   _           <- setxattrUUID file uuid
