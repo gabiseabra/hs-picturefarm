@@ -13,9 +13,9 @@ import           Control.Composition
 
 pictures :: [PictureInput]
 pictures =
-  [ ("test1.jpg", "test1.jpg", md5 "test1", "image/jpg")
-  , ("test2.jpg", "test2.jpg", md5 "test2", "image/jpg")
-  , ("test3.jpg", "test3.jpg", md5 "test3", "image/jpg")
+  [ ("test1.jpg", "test1.jpg", md5 "test1", "image", "image/jpg")
+  , ("test2.jpg", "test2.jpg", md5 "test2", "image", "image/jpg")
+  , ("test3.jpg", "test3.jpg", md5 "test3", "image", "image/jpg")
   ]
 
 pictureTags :: [UUID] -> [PictureTagInput]

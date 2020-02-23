@@ -49,15 +49,16 @@ import           PgNamed                        ( (=?)
 -- Schema
 ----------------------------------------------------------------------
 
-data Picture = Picture {
-  id       :: Int,
-  uuid     :: UUID.UUID,
-  fileName :: Text,
-  fileHash :: Text,
-  url      :: Text,
-  mimeType :: Text,
-  tags     :: [Text]
-} deriving (Generic, Show, Eq, FromRow)
+data Picture = Picture
+  { id           :: Int
+  , uuid         :: UUID.UUID
+  , fileName     :: Text
+  , fileHash     :: Text
+  , url          :: Text
+  , resourceType :: Text
+  , mimeType     :: Text
+  , tags         :: [Text]
+  } deriving (Generic, Show, Eq, FromRow)
 
 -- Queries
 ----------------------------------------------------------------------
@@ -67,13 +68,15 @@ insertPicture conn Picture {..} = do
   [(rid, uuid)] :: [(Int, UUID)] <- returning
     conn
     insertPictureQuery
-    [(fileName, fileHash, url, mimeType)]
+    [(fileName, fileHash, url, resourceType, mimeType)]
   _ <- executeMany conn insertPictureTagQuery $ unnest uuid tags
   return (rid, uuid)
 
 updatePicture :: Connection -> Picture -> IO ()
 updatePicture conn Picture {..} = withTransaction conn $ do
-  execute conn updatePictureQuery     (fileName, fileHash, url, mimeType, uuid)
+  execute conn
+          updatePictureQuery
+          (fileName, fileHash, url, resourceType, mimeType, uuid)
   execute conn deletePictureTagsQuery (Only uuid)
   executeMany conn insertPictureTagQuery $ unnest uuid tags
   return ()
@@ -98,22 +101,26 @@ findPictures conn input@FindPicturesInput {..} =
         conn
         (findPictureQuery input)
         [ "tags" =? tags
+        , "resourceType" =? resourceType
         , "orderBy" =? orderBy
         , "limit" =? limit
         , "offset" =? offset
         ]
 
-data FindPicturesInput = FindPicturesInput {
-  tags :: Maybe [Text],
-  orderBy :: OrderBy IndexedField,
-  pagination :: Maybe PaginationInput
-}
+data FindPicturesInput = FindPicturesInput
+  { tags         :: Maybe [Text]
+  , resourceType :: Maybe Text
+  , orderBy      :: OrderBy IndexedField
+  , pagination   :: Maybe PaginationInput
+  }
 
 instance QueryOptions FindPicturesInput where
-  filterableFields _ = ["tags"]
+  filterableFields _ = ["tags", "resourceType"]
 
   applyFilters "tags" FindPicturesInput { tags = Just _ } = [tagsFilter]
-  applyFilters _      _ = []
+  applyFilters "resourceType" FindPicturesInput { resourceType = Just _ } =
+    [resourceTypeFilter]
+  applyFilters _ _ = []
 
 instance Default FindPicturesInput where
-  def = FindPicturesInput Nothing (OrderBy ID DESC) Nothing
+  def = FindPicturesInput Nothing Nothing (OrderBy ID DESC) Nothing

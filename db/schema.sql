@@ -62,7 +62,8 @@ CREATE TABLE public.pictures (
     url character varying NOT NULL,
     mime_type character varying NOT NULL,
     created_at timestamp(6) without time zone DEFAULT now() NOT NULL,
-    updated_at timestamp(6) without time zone DEFAULT now() NOT NULL
+    updated_at timestamp(6) without time zone DEFAULT now() NOT NULL,
+    resource_type character varying
 );
 
 
@@ -181,4 +182,5 @@ ALTER TABLE ONLY public.picture_tags
 INSERT INTO public.schema_migrations (version) VALUES
     ('20200125213105'),
     ('20200125213320'),
-    ('20200125213531');
+    ('20200125213531'),
+    ('20200223083851');

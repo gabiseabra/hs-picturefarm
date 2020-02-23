@@ -27,7 +27,7 @@ import           Database.PostgreSQL.Simple     ( Connection
                                                 )
 import           Database.PostgreSQL.Simple.SqlQQ
 
-type PictureInput = (Text, Text, Text, Text)
+type PictureInput = (Text, Text, Text, Text, Text)
 
 type PictureTagInput = (UUID, [Text])
 
@@ -74,8 +74,8 @@ cleanupDB conn = do
 ----------------------------------------------------------------------
 
 insertPictureQuery = [sql|
-  insert into pictures (url, file_name, file_hash, mime_type)
-  values (?, ?, ?, ?)
+  insert into pictures (url, file_name, file_hash, resource_type, mime_type)
+  values (?, ?, ?, ?, ?)
   returning uuid
   |]
 

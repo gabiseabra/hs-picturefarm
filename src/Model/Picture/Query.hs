@@ -36,6 +36,7 @@ fromPictures = [qq|
        , p.file_name
        , p.file_hash
        , p.url
+       , p.resource_type
        , p.mime_type
        , array_remove(array_agg(pt.tag), NULL)
   from pictures p
@@ -63,23 +64,26 @@ tagsFilter = Filter
     )
   |]
 
+resourceTypeFilter = Filter WHERE [qq| resource_type = ?resourceType|]
+
 -- Queries
 ----------------------------------------------------------------------
 
 insertPictureQuery :: Query
 insertPictureQuery = cs $ [qm|
-    insert into pictures (file_name, file_hash, url, mime_type)
-    values (?, ?, ?, ?)
+    insert into pictures (file_name, file_hash, url, resource_type, mime_type)
+    values (?, ?, ?, ?, ?)
     returning id, uuid
   |]
 
 updatePictureQuery :: Query
 updatePictureQuery = cs $ [qm|
     update pictures
-    set file_name = ?
-      , file_hash = ?
-      , url       = ?
-      , mime_type = ?
+    set file_name     = ?
+      , file_hash     = ?
+      , url           = ?
+      , resource_type = ?
+      , mime_type     = ?
     where uuid = ?
   |]
 

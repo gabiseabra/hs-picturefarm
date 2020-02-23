@@ -59,13 +59,14 @@ insertPicture Env { conn, config } file = do
   fileHash <- md5Digest file
   tags     <- getxattrTags file
   res      <- runReq defaultHttpConfig (responseBody <$> CDN.upload config file)
-  let pic = Picture { id       = 0
-                    , uuid     = UUID.nil
+  let pic = Picture { id           = 0
+                    , uuid         = UUID.nil
                     , tags
                     , fileHash
-                    , fileName = (cs $ takeFileName file)
-                    , url      = public_id res <> "." <> format res
-                    , mimeType = (cs . defaultMimeLookup . cs $ file)
+                    , fileName     = (cs $ takeFileName file)
+                    , url          = public_id res <> "." <> format res
+                    , resourceType = resource_type res
+                    , mimeType     = (cs . defaultMimeLookup . cs $ file)
                     }
   (rid, uuid) <- Pic.insertPicture conn pic
   _           <- setxattrUUID file uuid
