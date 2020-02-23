@@ -31,7 +31,7 @@ cmd Env { conn } (Command "pic" user chan message) = do
   pic <- findOnePicture conn message
   case pic of
     Nothing ->
-      return $ Just $ fmtMsg chan [FormatLink notFoundUrl "nothing to show"]
+      return $ Just $ fmtMsg chan [FormatLink notFoundUrl "got nothing"]
     Just pic ->
       return $ Just $ fmtMsg chan [FormatLink (url pic) (fileName pic)]
 cmd _ _ = return Nothing
