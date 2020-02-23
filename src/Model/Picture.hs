@@ -17,7 +17,7 @@ import           Database.QueryBuilder
 import           Model
 import           Model.Pagination
 import           Model.Picture.Query
-
+import           Service.Cloudinary             ( CloudinaryResource(..) )
 import           Control.Monad
 import           Control.Monad.Error.Class      ( liftEither )
 import           Control.Applicative            ( empty )
@@ -59,6 +59,10 @@ data Picture = Picture
   , mimeType     :: Text
   , tags         :: [Text]
   } deriving (Generic, Show, Eq, FromRow)
+
+instance CloudinaryResource Picture where
+  cdnPublicId     = url
+  cdnResourceType = resourceType
 
 -- Queries
 ----------------------------------------------------------------------

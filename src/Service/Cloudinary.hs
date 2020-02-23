@@ -1,5 +1,6 @@
 module Service.Cloudinary
   ( CloudinaryResponse(..)
+  , CloudinaryResource(..)
   , upload
   )
 where
@@ -35,6 +36,18 @@ data CloudinaryResponse  = CloudinaryResponse {
   format        :: T.Text,
   resource_type :: T.Text
 } deriving (Generic, FromJSON, Eq, Show)
+
+class CloudinaryResource a where
+  cdnPublicId :: a -> T.Text
+  cdnResourceType :: a -> T.Text
+  cdnPublicUrl :: a -> Config -> T.Text
+  cdnPublicUrl a Config {..} =
+       "https://res.cloudinary.com/"
+    <> (cs cdnCloudName)
+    <> "/"
+    <> cdnResourceType a
+    <> "/upload/"
+    <> cdnPublicId a
 
 upload :: Config -> FilePath -> Req (JsonResponse CloudinaryResponse)
 upload config fileName = do

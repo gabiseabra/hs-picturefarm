@@ -4,6 +4,7 @@ module Slack.Command.Emo
 where
 
 import           Env
+import           Service.Cloudinary             ( CloudinaryResource(..) )
 import           Slack.Message                  ( SlackMessage(..)
                                                 , MessageBlock(..)
                                                 )
@@ -28,9 +29,6 @@ import           Control.Exception              ( SomeException
 
 import           Network.Linklater              ( Command(..) )
 
-publicUrl :: Config -> T.Text -> T.Text
-publicUrl Config { cdnPublicUrl } url = (cs cdnPublicUrl) <> "/" <> url
-
 cmd :: CommandParser
 cmd Env { config, conn } (Command "emo" user chan message _ _) = do
   pic <- findOnePicture conn message
@@ -38,9 +36,9 @@ cmd Env { config, conn } (Command "emo" user chan message _ _) = do
     Nothing -> return $ Just $ SlackMessage
       "got nothing"
       (Just [ImageBlock notFoundUrl "404"])
-    Just Picture { fileName, url } -> return $ Just $ SlackMessage
-      fileName
-      (Just [ImageBlock (publicUrl config url) fileName])
+    Just pic -> return $ Just $ SlackMessage
+      (fileName pic)
+      (Just [ImageBlock (cdnPublicUrl pic config) (fileName pic)])
 cmd _ _ = return Nothing
 
 findOnePicture :: Connection -> Maybe T.Text -> IO (Maybe Picture)

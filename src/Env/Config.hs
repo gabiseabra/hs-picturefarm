@@ -46,7 +46,6 @@ data Config = Config
   , cdnUploadPreset :: String
   , cdnApiKey       :: String
   , cdnApiSecret    :: String
-  , cdnPublicUrl    :: String
   , slackToken      :: String
   } deriving (Generic, Show)
 
@@ -62,7 +61,6 @@ instance Default Config where
     , cdnUploadPreset = ""
     , cdnApiKey       = ""
     , cdnApiSecret    = ""
-    , cdnPublicUrl    = ""
     , slackToken      = ""
     }
 
