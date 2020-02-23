@@ -34,11 +34,13 @@ cmd Env { config, conn } (Command "emo" user chan message _ _) = do
   pic <- findOnePicture conn message
   case pic of
     Nothing -> return $ Just $ SlackMessage
-      "got nothing"
-      (Just [ImageBlock notFoundUrl "404"])
+      "404"
+      (Just [ImageBlock notFoundUrl (formatTitle message Nothing)])
     Just pic -> return $ Just $ SlackMessage
       (fileName pic)
-      (Just [ImageBlock (cdnPublicUrl pic config) (fileName pic)])
+      (Just
+        [ImageBlock (cdnPublicUrl pic config) (formatTitle message (Just pic))]
+      )
 cmd _ _ = return Nothing
 
 findOnePicture :: Connection -> Maybe T.Text -> IO (Maybe Picture)
@@ -60,3 +62,8 @@ notFoundUrl = "https://http.cat/404"
 
 parseTags Nothing    = Nothing
 parseTags (Just tag) = Just [tag]
+
+formatTitle :: Maybe T.Text -> Maybe Picture -> T.Text
+formatTitle (Just msg) (Just pic) = msg <> " - " <> fileName pic
+formatTitle Nothing    (Just pic) = fileName pic
+formatTitle _          Nothing    = "got nothing"
