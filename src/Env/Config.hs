@@ -37,7 +37,7 @@ instance Exception ConfigException
 -- Config schema
 ----------------------------------------------------------------------
 
-data Environment = Production | Development | Test
+data Environment = Production | Development | Test deriving (Show)
 
 data Config = Config
   { port            :: Int
@@ -46,7 +46,6 @@ data Config = Config
   , cdnUploadPreset :: String
   , cdnApiKey       :: String
   , cdnApiSecret    :: String
-  , slackToken      :: String
   } deriving (Generic, Show)
 
 instance FromEnv Config
@@ -61,7 +60,6 @@ instance Default Config where
     , cdnUploadPreset = ""
     , cdnApiKey       = ""
     , cdnApiSecret    = ""
-    , slackToken      = ""
     }
 
 -- Config methods
