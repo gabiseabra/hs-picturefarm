@@ -44,9 +44,14 @@ cmd _ _ = return Nothing
 findOnePicture :: Connection -> Maybe T.Text -> IO (Maybe Picture)
 findOnePicture conn message =
   let
-    tags = parseTags message
+    tags       = parseTags message
     pagination = Just PaginationInput { page = Just 1, pageSize = Just 1 }
-    input = def { tags, orderBy = Pic.Random, pagination } :: FindPicturesInput
+    input =
+      def { tags
+          , resourceType = Just "image"
+          , orderBy      = Pic.Random
+          , pagination
+          } :: FindPicturesInput
   in
     fmap headZ $ catch (Pic.findPictures conn input) $ \(_ :: SomeException) ->
       return []
