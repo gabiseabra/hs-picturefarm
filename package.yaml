@@ -73,6 +73,7 @@ dependencies:
 - filepath
 - mime-types
 - time
+- modern-uri
 
 library:
   source-dirs: src

@@ -54,6 +54,13 @@ packages:
   original:
     hackage: command-0.1.1
 - completed:
+    hackage: req-3.1.0@sha256:c42bf205421a3a07749c725d1a9ebd494dd577cd2f7f62e7ff26a98b3229da1c,4800
+    pantry-tree:
+      size: 712
+      sha256: d91f5677cf1adc0a121fa9aa330270c7eb273f499ba519383a29b0f6b0d4bf22
+  original:
+    hackage: req-3.1.0
+- completed:
     size: 152435
     url: https://github.com/hlian/linklater/archive/7116a0c08a3e17a60df4cb6b036cee68e6a727a7.tar.gz
     cabal-file:

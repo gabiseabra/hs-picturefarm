@@ -4,15 +4,17 @@ module Slack.Command
   ( CommandParser(..)
   , CommandError(..)
   , runCmd
-  , sayMsg
-  , fmtMsg
   )
 where
 
 import           Env                            ( Env(..)
                                                 , Config(..)
                                                 )
+import           Slack.Message                  ( SlackMessage
+                                                , send
+                                                )
 
+import           Data.Aeson                     ( encode )
 import           Data.String.Conversions
 import qualified Data.Text                     as T
 
@@ -25,29 +27,16 @@ import           Control.Exception              ( Exception
                                                 , throw
                                                 )
 
-import           Network.Linklater              ( Message(..)
-                                                , Icon(..)
-                                                , Command(..)
-                                                , say
-                                                )
-import           Network.Linklater.Types        ( RequestError )
-import qualified Network.Linklater             as LL
+import           Network.Linklater              ( Command(..) )
 
 data CommandError = InvalidCommand | CommandError String deriving (Eq, Show, Exception)
 
-type CommandParser = (Env -> Command -> IO (Maybe Message))
+type CommandParser = (Env -> Command -> IO (Maybe SlackMessage))
 
-cmdConfig :: Command -> LL.Config
-cmdConfig (Command _ _ _ _ url _) = LL.Config url
+respUrl :: Command -> T.Text
+respUrl (Command _ _ _ _ url _) = url
 
 runCmd :: CommandParser -> Env -> Command -> IO T.Text
 runCmd cmd env@Env { config } c = do
-  res <- maybe (return $ Right ()) (runExceptT . sayMsg c) =<< cmd env c
-  case res of
-    Right _   -> return ""
-    Left  err -> throw $ CommandError $ show err
-
-sayMsg :: (MonadError RequestError m, MonadIO m) => Command -> Message -> m ()
-sayMsg = (flip say) . cmdConfig
-
-fmtMsg = FormattedMessage (EmojiIcon "horse") "picturefarm"
+  _ <- maybe (return ()) (flip send $ respUrl c) =<< cmd env c
+  return ""
