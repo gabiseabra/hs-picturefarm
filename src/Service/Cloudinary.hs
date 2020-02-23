@@ -40,6 +40,8 @@ data CloudinaryResponse  = CloudinaryResponse {
 class CloudinaryResource a where
   cdnPublicId :: a -> T.Text
   cdnResourceType :: a -> T.Text
+  cdnFlags :: a -> T.Text
+  cdnFlags _ = "q_auto,f_auto"
   cdnPublicUrl :: a -> Config -> T.Text
   cdnPublicUrl a Config {..} =
        "https://res.cloudinary.com/"
@@ -47,6 +49,8 @@ class CloudinaryResource a where
     <> "/"
     <> cdnResourceType a
     <> "/upload/"
+    <> cdnFlags a
+    <> "/"
     <> cdnPublicId a
 
 upload :: Config -> FilePath -> Req (JsonResponse CloudinaryResponse)
