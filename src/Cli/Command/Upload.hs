@@ -49,7 +49,7 @@ processFile env file = do
       Picture { uuid, fileName } <- insertPicture env file
       putStrLn $ "[" ++ (show uuid) ++ "] Inserted " ++ (cs fileName)
     Just pic@Picture { uuid, fileName } -> do
-      uploadPicture env file pic
+      updatePicture env file pic
       putStrLn $ "[" ++ (show uuid) ++ "] Updated " ++ (cs fileName)
 
 -- | Upload and insert a new picture to the database
@@ -74,8 +74,8 @@ insertPicture Env { conn, config } file = do
 
 -- | Updates picture attributes
 --------------------------------------------------------------------------------
-uploadPicture :: Env -> FilePath -> Picture -> IO ()
-uploadPicture Env { conn } file pic = do
+updatePicture :: Env -> FilePath -> Picture -> IO ()
+updatePicture Env { conn } file pic = do
   fileHash <- md5Digest file
   tags     <- getxattrTags file
   Pic.updatePicture
