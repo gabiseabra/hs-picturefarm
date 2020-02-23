@@ -1,1 +1,1 @@
-web: hs-picturefarm-server
+web: hs-picturefarm-slack
