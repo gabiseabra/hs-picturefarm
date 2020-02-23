@@ -46,22 +46,30 @@ fromPictures = [qq|
 -- Filters
 ----------------------------------------------------------------------
 
+tagsCTEr = [qq|
+
+|]
+
 tagsFilter = Filter
   JOIN
   [qq|
   inner join picture_tags ptw
     on ptw.picture_uuid = p.uuid
-    and ptw.tag in (
-      /* -- Select a list of aliases corresponding to all queried tags */
-      select v.value
-      from tag_aliases ta
-      cross join lateral (
-        values ('alias', ta.alias), ('tag', ta.tag)
-      ) v (col, value)
-      where array[ta.tag,ta.alias]::text[]  && ?tags
-      union all
-      select unnest( ?tags )
-    )
+    and ( ptw.tag = any (?tags::text[]) or ptw.tag in (
+      with recursive tags_match (tag) as (
+          /* -- Select a list of aliases corresponding to all queried tags */
+          select v.value
+          from tag_aliases ta
+          cross join lateral (
+            values ('alias', ta.alias), ('tag', ta.tag)
+          ) v (col, value)
+          where array[ta.tag,ta.alias]::text[]  && ?tags
+        union all
+          select ta.alias
+          from tag_aliases ta, tags_match tm
+          where ta.tag = tm.tag
+      ) select tag from tags_match
+    ) )
   |]
 
 resourceTypeFilter = Filter WHERE [qq| resource_type = ?resourceType|]
