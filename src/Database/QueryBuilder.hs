@@ -2,7 +2,7 @@
 
 module Database.QueryBuilder
   ( ClauseType(..)
-  , Filter(..)
+  , Clause(..)
   , QueryOptions(..)
   , Order(..)
   , OrderBy(..)
@@ -45,24 +45,28 @@ instance ConvertibleStrings UUID BS.ByteString where
 class QueryOptions a where
   filterableFields :: a -> [String]
 
-  applyFilters :: String -> a -> [Filter]
+  applyFilters :: String -> a -> [Clause]
 
-  toFilters :: a -> [Filter]
+  toFilters :: a -> [Clause]
   toFilters a = concatMap (`applyFilters` a) $ filterableFields a
 
   buildClause :: ClauseType -> a -> String
   buildClause JOIN = between "\n" . pickByType JOIN . toFilters
   buildClause WHERE =
     prefix "where" . between "and" . pickByType WHERE . toFilters
+  buildClause CTE =
+    prefix "with" . between ", " . pickByType CTE . toFilters
 
-instance QueryOptions [Filter] where
+instance QueryOptions [Clause] where
   filterableFields _ = []
   applyFilters _ a = a
   toFilters a = a
 
-extractQuery (Filter t q) = q
+extractQuery :: Clause -> String
+extractQuery (Clause t q) = q
 
-isFilterType t (Filter t' _) = t == t'
+isFilterType :: ClauseType -> Clause -> Bool
+isFilterType t (Clause t' _) = t == t'
 
 pickByType t = map extractQuery . filter (isFilterType t)
 
@@ -73,9 +77,9 @@ between str = List.concat . List.intersperse (" " ++ str ++ " ")
 
 ----------------------------------------------------------------------
 
-data ClauseType = JOIN | WHERE deriving (Eq)
+data ClauseType = JOIN | WHERE | CTE deriving (Eq)
 
-data Filter = Filter ClauseType String
+data Clause = Clause ClauseType String
 
 ----------------------------------------------------------------------
 

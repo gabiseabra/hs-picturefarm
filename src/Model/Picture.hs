@@ -121,7 +121,8 @@ data FindPicturesInput = FindPicturesInput
 instance QueryOptions FindPicturesInput where
   filterableFields _ = ["tags", "resourceType"]
 
-  applyFilters "tags" FindPicturesInput { tags = Just _ } = [tagsFilter]
+  applyFilters "tags" FindPicturesInput { tags = Just _ } =
+    [tagsCTE, tagsFilter]
   applyFilters "resourceType" FindPicturesInput { resourceType = Just _ } =
     [resourceTypeFilter]
   applyFilters _ _ = []

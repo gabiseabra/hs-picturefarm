@@ -46,33 +46,36 @@ fromPictures = [qq|
 -- Filters
 ----------------------------------------------------------------------
 
-tagsCTEr = [qq|
-
+tagsCTE = Clause
+  CTE
+  [qq|
+  recursive tags_matched (tag) as (
+      /* -- Select a list of aliases corresponding to all queried tags */
+      select v.value
+      from tag_aliases ta
+      cross join lateral (
+        values ('alias', ta.alias), ('tag', ta.tag)
+      ) v (col, value)
+      where array[ta.tag,ta.alias]::text[]  && ?tags
+    union all
+      select ta.alias
+      from tag_aliases ta, tags_matched tm
+      where ta.tag = tm.tag
+  )
 |]
 
-tagsFilter = Filter
+tagsFilter = Clause
   JOIN
   [qq|
-  inner join picture_tags ptw
-    on ptw.picture_uuid = p.uuid
-    and ( ptw.tag = any (?tags::text[]) or ptw.tag in (
-      with recursive tags_match (tag) as (
-          /* -- Select a list of aliases corresponding to all queried tags */
-          select v.value
-          from tag_aliases ta
-          cross join lateral (
-            values ('alias', ta.alias), ('tag', ta.tag)
-          ) v (col, value)
-          where array[ta.tag,ta.alias]::text[]  && ?tags
-        union all
-          select ta.alias
-          from tag_aliases ta, tags_match tm
-          where ta.tag = tm.tag
-      ) select tag from tags_match
-    ) )
+  inner join picture_tags ptf
+    on ptf.picture_uuid = p.uuid
+    and (
+         ptf.tag = any (?tags)
+      or ptf.tag in ( select tag from tags_matched )
+    )
   |]
 
-resourceTypeFilter = Filter WHERE [qq| resource_type = ?resourceType|]
+resourceTypeFilter = Clause WHERE [qq| resource_type = ?resourceType|]
 
 -- Queries
 ----------------------------------------------------------------------
@@ -116,9 +119,11 @@ getPictureByQuery = cs $ [qm|
 
 findPictureQuery :: (QueryOptions a) => a -> Query
 findPictureQuery filters =
-  let joinClause  = buildClause JOIN filters
+  let cteClause   = buildClause CTE filters
+      joinClause  = buildClause JOIN filters
       whereClause = buildClause WHERE filters
   in  cs $ [qm|
+    ${cteClause}
     ${fromPictures}
     ${joinClause}
     ${whereClause}
