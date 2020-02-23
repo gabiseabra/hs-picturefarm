@@ -27,7 +27,7 @@ import           Control.Monad
 main :: IO ()
 main = do
   ctx@(_, config, _) <- initializeWithDefaults def
-  putStrLn ("+ Listening on port " <> show (port config))
+  putStrLn ("Listening on port " <> show (port config))
   run (port config) $ application ctx
 
 application :: AppContext -> Application

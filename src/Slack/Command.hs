@@ -2,7 +2,6 @@
 
 module Slack.Command
   ( CommandParser(..)
-  , CommandError(..)
   , runCmd
   )
 where
@@ -18,18 +17,7 @@ import           Data.Aeson                     ( encode )
 import           Data.String.Conversions
 import qualified Data.Text                     as T
 
-import           Control.Monad.IO.Class         ( MonadIO )
-import           Control.Monad                  ( (<=<) )
-import           Control.Monad.Except           ( MonadError
-                                                , runExceptT
-                                                )
-import           Control.Exception              ( Exception
-                                                , throw
-                                                )
-
 import           Network.Linklater              ( Command(..) )
-
-data CommandError = InvalidCommand | CommandError String deriving (Eq, Show, Exception)
 
 type CommandParser = (Env -> Command -> IO (Maybe SlackMessage))
 

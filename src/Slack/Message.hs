@@ -20,8 +20,6 @@ import           Text.URI                       ( URI
 import           Control.Exception              ( Exception
                                                 , throw
                                                 )
-import           Control.Monad                  ( (<=<) )
-import           Data.String.Conversions
 
 import           Network.HTTP.Req               ( Url(..)
                                                 , Scheme(..)
@@ -37,7 +35,7 @@ import           Network.HTTP.Req               ( Url(..)
                                                 , ignoreResponse
                                                 )
 
-data InvalidSlackHookUrl = InvalidSlackHookUrl T.Text deriving (Show, Exception)
+data InvalidHookUrl = InvalidHookUrl T.Text deriving (Show, Exception)
 
 data MessageBlock = ImageBlock { url :: T.Text, title :: T.Text }
 
@@ -57,7 +55,6 @@ data SlackMessage = SlackMessage
 
 send :: SlackMessage -> T.Text -> IO ()
 send msg url = do
-  _ <- putStrLn (cs $ encode msg)
   _ <- runReq defaultHttpConfig . slackReq msg =<< parseUrl url
   return ()
 
@@ -67,8 +64,4 @@ slackReq msg (url, opt) = req POST url (ReqBodyJson msg) ignoreResponse opt
 
 parseUrl :: T.Text -> IO (Url 'Https, Option 'Https)
 parseUrl uri =
-  return
-    .   maybe (throw $ InvalidSlackHookUrl uri) (id)
-    .   useHttpsURI
-    <=< mkURI
-    $   uri
+  return . maybe (throw $ InvalidHookUrl uri) (id) . useHttpsURI =<< mkURI uri
