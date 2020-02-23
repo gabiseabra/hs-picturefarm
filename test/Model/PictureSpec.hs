@@ -42,10 +42,11 @@ pictures =
   [ ("test1.jpg", "test1.jpg", md5 "test1", "image", "image/jpg")
   , ("test2.jpg", "test2.jpg", md5 "test2", "image", "image/jpg")
   , ("test3.jpg", "test3.jpg", md5 "test3", "image", "image/jpg")
+  , ("test4.mp4", "test4.mp4", md5 "test4", "video", "video/mp4")
   ]
 
 pictureTags :: [UUID] -> [PictureTagInput]
-pictureTags uuids = zip uuids [["a", "b", "d"], ["a'", "d"], ["c", "d"]]
+pictureTags uuids = zip uuids [["a", "b", "d"], ["a'", "d"], ["c", "d"], []]
 
 tagAliases :: [TagAliasInput]
 tagAliases = [("a", "a'")]
@@ -100,20 +101,25 @@ spec = setup $ do
       UUIDv4.nextRandom >>= getPictureBy conn UUID >>= (`shouldBe` Nothing)
 
   describe "findPictures" $ do
-    it "queries pictures with a given tag" $ \(conn, _) -> do
+    it "queries pictures by tags" $ \(conn, _) -> do
       findPictures conn def { tags = Just ["a"] }
         >>= (`shouldBe` ["test1.jpg", "test2.jpg"])
         .   sort
         .   map fileName
-
-
-    it "queries pictures with any of the given tag" $ \(conn, _) -> do
       findPictures conn def { tags = Just ["b", "c"] }
         >>= (`shouldBe` ["test1.jpg", "test3.jpg"])
         .   sort
         .   map fileName
 
-
+    it "queries pictures by resource type" $ \(conn, _) -> do
+      findPictures conn def { resourceType = Just "image" }
+        >>= (`shouldBe` ["test1.jpg", "test2.jpg", "test3.jpg"])
+        .   sort
+        .   map fileName
+      findPictures conn def { resourceType = Just "video" }
+        >>= (`shouldBe` ["test4.mp4"])
+        .   sort
+        .   map fileName
 
     it "orders results" $ \(conn, _) -> do
       desc <- findPictures

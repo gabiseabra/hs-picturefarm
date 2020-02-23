@@ -57,6 +57,7 @@ data SlackMessage = SlackMessage
 
 send :: SlackMessage -> T.Text -> IO ()
 send msg url = do
+  _ <- putStrLn (cs $ encode msg)
   _ <- runReq defaultHttpConfig . slackReq msg =<< parseUrl url
   return ()
 
