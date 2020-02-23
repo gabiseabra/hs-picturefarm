@@ -47,7 +47,8 @@ extra-deps:
 - hspec-wai-0.10.1
 - xattr-0.6.2
 - command-0.1.1
-- linklater-4.0.0.2
+- github: hlian/linklater
+  commit: 7116a0c08a3e17a60df4cb6b036cee68e6a727a7
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

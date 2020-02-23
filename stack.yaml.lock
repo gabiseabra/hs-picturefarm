@@ -54,12 +54,19 @@ packages:
   original:
     hackage: command-0.1.1
 - completed:
-    hackage: linklater-4.0.0.2@sha256:c4d21b2ed782b6ca5fa69cdca244d60c2470cd82bf2ddd620e3e948619745609,1719
+    size: 152435
+    url: https://github.com/hlian/linklater/archive/7116a0c08a3e17a60df4cb6b036cee68e6a727a7.tar.gz
+    cabal-file:
+      size: 1889
+      sha256: 61a08f1d522f82c626a504c6815f293385971f1887def25815f58a1e6d8235d0
+    name: linklater
+    version: 4.0.0.2
+    sha256: b9a3d628623852805c02b2f100e0cf56de74eb2f376af473cf42c0cec21378c0
     pantry-tree:
-      size: 369
-      sha256: 54b9af4f1c3ff19cd98de64c7fb1ce2a98e9bf5c23654bea4c9393c3b46e6442
+      size: 1620
+      sha256: 7923455ee115107030f66dabd3b5da1ee8f2e5d3aee27ef943422d52b094ddb7
   original:
-    hackage: linklater-4.0.0.2
+    url: https://github.com/hlian/linklater/archive/7116a0c08a3e17a60df4cb6b036cee68e6a727a7.tar.gz
 snapshots:
 - completed:
     size: 524164

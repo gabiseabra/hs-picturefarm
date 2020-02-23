@@ -27,7 +27,7 @@ import           Network.Linklater              ( Command(..)
                                                 )
 
 cmd :: CommandParser
-cmd Env { conn } (Command "pic" user chan message) = do
+cmd Env { conn } (Command "emo" user chan message _ _) = do
   pic <- findOnePicture conn message
   case pic of
     Nothing ->

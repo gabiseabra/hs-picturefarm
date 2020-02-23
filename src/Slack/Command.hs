@@ -27,7 +27,7 @@ import           Control.Exception              ( Exception
 
 import           Network.Linklater              ( Message(..)
                                                 , Icon(..)
-                                                , Command
+                                                , Command(..)
                                                 , say
                                                 )
 import           Network.Linklater.Types        ( RequestError )
@@ -37,17 +37,17 @@ data CommandError = InvalidCommand | CommandError String deriving (Eq, Show, Exc
 
 type CommandParser = (Env -> Command -> IO (Maybe Message))
 
-slackConfig :: Config -> LL.Config
-slackConfig = LL.Config . cs . slackToken
+cmdConfig :: Command -> LL.Config
+cmdConfig (Command _ _ _ _ url _) = LL.Config url
 
 runCmd :: CommandParser -> Env -> Command -> IO T.Text
 runCmd cmd env@Env { config } c = do
-  res <- maybe (return $ Right ()) (runExceptT . sayMsg config) =<< cmd env c
+  res <- maybe (return $ Right ()) (runExceptT . sayMsg c) =<< cmd env c
   case res of
     Right _   -> return ""
     Left  err -> throw $ CommandError $ show err
 
-sayMsg :: (MonadError RequestError m, MonadIO m) => Config -> Message -> m ()
-sayMsg = (flip say) . slackConfig
+sayMsg :: (MonadError RequestError m, MonadIO m) => Command -> Message -> m ()
+sayMsg = (flip say) . cmdConfig
 
 fmtMsg = FormattedMessage (EmojiIcon "horse") "picturefarm"
