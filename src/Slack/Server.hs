@@ -1,6 +1,5 @@
 module Slack.Server
-  ( main
-  , application
+  ( application
   )
 where
 
@@ -24,13 +23,7 @@ import           Network.Wai                    ( Application )
 
 import           Control.Monad
 
-main :: IO ()
-main = do
-  ctx@(_, config, _) <- initializeWithDefaults def
-  putStrLn ("Listening on port " <> show (port config))
-  run (port config) $ application ctx
-
-application :: AppContext -> Application
-application = slashSimple . (. flip (runCmd cmd)) . (>>=) . getEnv
+application :: AppContext -> IO Application
+application = return . slashSimple . (. flip (runCmd cmd)) . (>>=) . getEnv
 
 cmd = Emo.cmd

@@ -13,7 +13,7 @@ module Spec.WebCase
 where
 
 import           Env
-import           Web.Router                     ( application )
+import           Web.Server                     ( application )
 import           Spec.TestCase
 
 import           Test.Hspec.Wai                 ( WaiSession

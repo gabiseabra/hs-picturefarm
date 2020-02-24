@@ -1,9 +1,9 @@
 cradle:
   stack:
     - path: ./app
-      component: "hs-picturefarm:exe:hs-picturefarm-server"
+      component: "hs-picturefarm:exe:hs-picturefarm-app"
     - path: ./app
-      component: "hs-picturefarm:exe:hs-picturefarm-cli"
+      component: "hs-picturefarm:exe:hs-picturefarm"
     - path: ./src
       component: "hs-picturefarm:lib"
     - path: ./test

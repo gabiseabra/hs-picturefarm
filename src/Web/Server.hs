@@ -1,28 +1,51 @@
 module Web.Server
-  ( main
+  ( application
   )
 where
 
-import           Env                            ( Config(..)
-                                                , initialize
+import           Env
+import qualified Web.GraphQL                   as GQL
+
+import           Control.Arrow
+import           Control.Applicative
+import           Control.Monad.IO.Class         ( liftIO )
+import           Control.Monad.Reader           ( lift
+                                                , asks
                                                 )
-import           Web.Router                     ( application )
 
-import           Control.Exception              ( SomeException
-                                                , catch
-                                                )
+import           Data.Text.Lazy                 ( Text )
 
-import           Network.Wai.Handler.Warp
+import           Network.Wai                    ( Application )
+import           Network.HTTP.Types
+import           Web.Scotty.Trans
 
-main :: IO ()
-main = do
-  ctx@(_, config, _) <- initialize
-  app                <- application ctx
-  print ("Starting server on http://localhost:" ++ show (port config))
-  runSettings (warpSettings config) app
+-- Routes
+----------------------------------------------------------------------
 
-onException _req e = print ("Error: " ++ show e)
+application :: AppContext -> IO Application
+application ctx@(_, config, _) = scottyAppT (runEnvIO ctx) router
 
-warpSettings :: Config -> Settings
-warpSettings config@Config { port } =
-  setPort port $ setOnException onException defaultSettings
+router :: ScottyT Text EnvM ()
+router = do
+  get "/api" $ do
+    env <- lift $ asks env
+    case env of
+      Just Production -> sendError status404
+      _               -> file "public/playground.html"
+
+  post "/api" $ do
+    response    <- GQL.api <$> (lift $ asks conn) <*> body
+    rawResponse <- liftIO response
+    setHeader "Content-Type" "application/json; charset=utf-8"
+    status status200
+    raw rawResponse
+
+  notFound $ sendError status404
+
+-- Helpers
+----------------------------------------------------------------------
+
+sendError :: (ScottyError e, Monad m) => Status -> ActionT e m ()
+sendError s = status s >> sendErrorMessage s
+
+sendErrorMessage status404 = text "Not found"
