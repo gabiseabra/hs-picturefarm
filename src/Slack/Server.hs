@@ -30,7 +30,7 @@ application :: AppContext -> IO Application
 application ctx = return $ router [dir "/auth" (authApp ctx)] (slashApp ctx)
 
 slashApp ctx@(_, Config {..}, _) =
-  verifySlackRequest (BS.pack slackSigningSecret) $ authApp ctx
+  verifySlackRequest (BS.pack slackSigningSecret) $ slashApp' ctx
 
 slashApp' :: AppContext -> Application
 slashApp' = slashSimple . (. flip (runCmd cmd)) . (>>=) . getEnv
