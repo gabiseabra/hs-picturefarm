@@ -40,26 +40,32 @@ instance Exception ConfigException
 data Environment = Production | Development | Test deriving (Show)
 
 data Config = Config
-  { port            :: Int
-  , databaseUrl     :: String
-  , cdnCloudName    :: String
-  , cdnUploadPreset :: String
-  , cdnApiKey       :: String
-  , cdnApiSecret    :: String
+  { port               :: Int
+  , databaseUrl        :: String
+  , cdnCloudName       :: String
+  , cdnUploadPreset    :: String
+  , cdnApiKey          :: String
+  , cdnApiSecret       :: String
+  , slackSigningSecret :: String
+  , slackClientId      :: String
+  , slackScopes        :: String
   } deriving (Generic, Show)
 
 instance FromEnv Config
 
 instance Default Config where
   def = Config
-    { port            = 4000
-    , databaseUrl     =
+    { port               = 4000
+    , databaseUrl        =
       "postgres://postgres:postgres@localhost:5432/picturefarm_dev?"
         <> "sslmode=disable"
-    , cdnCloudName    = ""
-    , cdnUploadPreset = ""
-    , cdnApiKey       = ""
-    , cdnApiSecret    = ""
+    , cdnCloudName       = ""
+    , cdnUploadPreset    = ""
+    , cdnApiKey          = ""
+    , cdnApiSecret       = ""
+    , slackSigningSecret = ""
+    , slackClientId      = ""
+    , slackScopes        = ""
     }
 
 -- Config methods
