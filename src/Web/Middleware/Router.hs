@@ -1,5 +1,6 @@
 module Web.Middleware.Router
-  ( module Network.Wai.Middleware.Router
+  ( Route
+  , router
   , match
   , dir
   )
@@ -10,11 +11,38 @@ import qualified Data.List                     as List
 
 import           Network.Wai                    ( Application
                                                 , Middleware
+                                                , pathInfo
                                                 )
 import           Network.Wai.Middleware.Rewrite ( rewritePureWithQueries )
-import           Network.Wai.Middleware.Router  ( Route
-                                                , router
-                                                )
+
+-- WAI Router
+-- https://github.com/mdmarek/wai-router/blob/master/Network/Wai/Middleware/Router.hs
+--------------------------------------------------------------------------------
+
+-- | Alias for a function which maps path pieces to applications.
+type Route = ([T.Text] -> Maybe Application)
+
+-- | Router for mapping paths to applications.
+-- 
+-- For example:
+-- 
+-- > router [ dir "/foo" fooApp
+-- >        , dir "/api" apiApp 
+-- >        ] defaultApp
+router :: [Route] -> Application -> Application
+router routes d req = case router' (pathInfo req) routes of
+  Nothing -> d req
+  Just a  -> a req
+
+-- | First matching paths' application, nothing otherwise.
+router' :: [T.Text] -> [Route] -> Maybe Application
+router' _  []       = Nothing
+router' ps (r : rs) = case r ps of
+  Nothing -> router' ps rs
+  Just a  -> Just a
+
+-- Route constructors
+--------------------------------------------------------------------------------
 
 -- | Match the beginning of a path
 match :: T.Text -> Application -> Route

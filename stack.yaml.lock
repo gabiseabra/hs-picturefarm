@@ -61,13 +61,6 @@ packages:
   original:
     hackage: req-3.1.0
 - completed:
-    hackage: wai-router-1.0.0.1@sha256:36ca265474bfcb7c682f8c5a8cb1400fb6c2db04ebb99cc480c075d9d15d8c52,816
-    pantry-tree:
-      size: 226
-      sha256: a3011df9cdc7e17611c5325960c60f4547aa793cd28d19443df77f384e574b89
-  original:
-    hackage: wai-router-1.0.0.1
-- completed:
     hackage: wai-middleware-slack-verify-0.1.0.0@sha256:45c9a847a5fad3215e7587738ccb81070856770c5715f4206aaad7ddf197595b,2612
     pantry-tree:
       size: 484
