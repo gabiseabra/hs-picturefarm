@@ -68,6 +68,13 @@ packages:
   original:
     hackage: wai-router-1.0.0.1
 - completed:
+    hackage: wai-middleware-slack-verify-0.1.0.0@sha256:45c9a847a5fad3215e7587738ccb81070856770c5715f4206aaad7ddf197595b,2612
+    pantry-tree:
+      size: 484
+      sha256: ab409bffc4947585f582b8fed9f0410769aaea7dbed901669afd2fb53f6b7d2d
+  original:
+    hackage: wai-middleware-slack-verify-0.1.0.0
+- completed:
     size: 152435
     url: https://github.com/hlian/linklater/archive/7116a0c08a3e17a60df4cb6b036cee68e6a727a7.tar.gz
     cabal-file:

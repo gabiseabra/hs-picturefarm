@@ -13,7 +13,6 @@ import           GHC.Generics
 
 import           Data.Aeson
 
-import           Data.String.Conversions
 import qualified Data.Text                     as T
 import           Text.URI                       ( mkURI )
 

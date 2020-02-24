@@ -75,6 +75,8 @@ dependencies:
 - time
 - modern-uri
 - wai-router
+- wai-extra
+- wai-middleware-slack-verify
 
 library:
   source-dirs: src

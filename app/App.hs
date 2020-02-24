@@ -1,12 +1,12 @@
 module App where
 
 import           Env
+import           Web.Middleware.Router
 import qualified Web.Server                    as Web
 import qualified Slack.Server                  as Slack
 
 import           Network.Wai                    ( Application )
 import           Network.Wai.Handler.Warp
-import           Network.Wai.Middleware.Router
 
 main :: IO ()
 main = do
@@ -19,7 +19,7 @@ application :: AppContext -> IO Application
 application ctx = do
   webApp   <- Web.application ctx
   slackApp <- Slack.application ctx
-  return (router [dir "/slack" slackApp] webApp)
+  return $ router [match "/slack" slackApp] webApp
 
 onException _req e = print ("Error: " ++ show e)
 
