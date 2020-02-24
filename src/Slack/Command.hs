@@ -17,6 +17,8 @@ import           Data.Aeson                     ( encode )
 import           Data.String.Conversions
 import qualified Data.Text                     as T
 
+import           Control.Concurrent             ( forkIO )
+
 import           Network.Linklater              ( Command(..) )
 
 type CommandParser = (Env -> Command -> IO (Maybe SlackMessage))
@@ -26,5 +28,5 @@ respUrl (Command _ _ _ _ url _) = url
 
 runCmd :: CommandParser -> Env -> Command -> IO T.Text
 runCmd cmd env@Env { config } c = do
-  _ <- maybe (return ()) (flip send $ respUrl c) =<< cmd env c
+  _ <- forkIO $ maybe (return ()) (flip send $ respUrl c) =<< cmd env c
   return ""
