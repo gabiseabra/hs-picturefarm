@@ -72,6 +72,7 @@ findOnePicture conn message =
 notFoundUrl = "https://http.cat/404"
 
 parseTags Nothing    = Nothing
+parseTags (Just "" ) = Nothing
 parseTags (Just tag) = Just [tag]
 
 formatTitle :: Maybe T.Text -> Maybe Picture -> T.Text
