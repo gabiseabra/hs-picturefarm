@@ -3,6 +3,7 @@
 
 module Slack.Message
   ( MessageBlock(..)
+  , BlockElement(..)
   , SlackMessage(..)
   , ResponseType(..)
   , send
@@ -36,10 +37,23 @@ import           Network.HTTP.Req               ( Url(..)
 
 data InvalidHookUrl = InvalidHookUrl T.Text deriving (Show, Exception)
 
-data MessageBlock = ImageBlock { url :: T.Text, title :: T.Text }
+data BlockElement = Markdown T.Text
+
+instance ToJSON BlockElement where
+  toJSON (Markdown text) =
+    object ["type" .= ("mrkdwn" :: T.Text), "text" .= text]
+
+data MessageBlock =
+    Image { url :: T.Text, title :: T.Text }
+  | Section BlockElement
+  | Context [BlockElement]
 
 instance ToJSON MessageBlock where
-  toJSON ImageBlock {..} = object
+  toJSON (Section element) =
+    object ["type" .= ("section" :: T.Text), "text" .= element]
+  toJSON (Context elements) =
+    object ["type" .= ("context" :: T.Text), "elements" .= elements]
+  toJSON Image {..} = object
     [ "type" .= ("image" :: T.Text)
     , "image_url" .= url
     , "alt_text" .= title
@@ -48,7 +62,7 @@ instance ToJSON MessageBlock where
     ]
 
 data ResponseType =
-    Ephemeral -- Only visible to the user who interacted with the slackbot
+    Ephemeral -- Only visible to the user who interacted with the slack bot
   | InChannel -- Visible to all in a channel
   deriving (Show)
 
@@ -71,8 +85,7 @@ send msg url = do
   _ <- runReq defaultHttpConfig . slackReq msg =<< parseUrl url
   return ()
 
-slackReq
-  :: SlackMessage -> (Url 'Https, Option 'Https) -> Req (IgnoreResponse)
+slackReq :: SlackMessage -> (Url 'Https, Option 'Https) -> Req IgnoreResponse
 slackReq msg (url, opt) = req POST url (ReqBodyJson msg) ignoreResponse opt
 
 parseUrl :: T.Text -> IO (Url 'Https, Option 'Https)
