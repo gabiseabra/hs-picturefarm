@@ -28,10 +28,11 @@ application ctx = do
   return $ middleware ctx $ router [match "/slack" slackApp] webApp
 
 middleware :: AppContext -> Middleware
-middleware (Just Production, _, _) = logStdout
-middleware _                       = logStdoutDev
+-- log request body in production for monitoring real quicc
+-- middleware (Just Production, _, _) = logStdout
+middleware _ = logStdoutDev
 
-onException _req e = print ("Error: " ++ show e)
+onException _req e = print (show e)
 
 warpSettings :: Config -> Settings
 warpSettings config@Config { port } =
