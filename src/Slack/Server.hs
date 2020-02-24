@@ -29,8 +29,11 @@ data InvalidOAuthURI = InvalidOAuthURI deriving (Show, Exception)
 application :: AppContext -> IO Application
 application ctx = return $ router [dir "/auth" (authApp ctx)] (slashApp ctx)
 
-slashApp :: AppContext -> Application
-slashApp = slashSimple . (. flip (runCmd cmd)) . (>>=) . getEnv
+slashApp ctx@(_, Config {..}, _) =
+  verifySlackRequest (BS.pack slackSigningSecret) $ authApp ctx
+
+slashApp' :: AppContext -> Application
+slashApp' = slashSimple . (. flip (runCmd cmd)) . (>>=) . getEnv
 
 authApp :: AppContext -> Application
 authApp (_, config, _) _ send =
