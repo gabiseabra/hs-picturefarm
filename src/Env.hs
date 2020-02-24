@@ -28,7 +28,9 @@ import           Control.Monad.Trans            ( MonadIO
                                                 , liftIO
                                                 )
 
-import           Data.Pool                      ( takeResource )
+import           Data.Pool                      ( takeResource
+                                                , withResource
+                                                )
 
 -- Application environment
 ----------------------------------------------------------------------
@@ -70,9 +72,8 @@ getEnv (env, config, pool) = do
   return Env { env, conn, config }
 
 withEnv :: AppContext -> (Env -> IO a) -> IO a
-withEnv ctx fn = getEnv ctx >>= fn
+withEnv ctx@(env, config, pool) fn =
+  withResource pool (\conn -> fn (Env { env, conn, config }))
 
 runEnvIO :: AppContext -> EnvM a -> IO a
-runEnvIO ctx m = do
-  env <- getEnv ctx
-  runReaderT (runEnvM m) env
+runEnvIO ctx m = withEnv ctx (\env -> runReaderT (runEnvM m) env)

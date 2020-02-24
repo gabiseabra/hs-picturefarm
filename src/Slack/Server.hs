@@ -33,7 +33,7 @@ slashApp ctx@(_, Config {..}, _) =
   verifySlackRequest (BS.pack slackSigningSecret) $ slashApp' ctx
 
 slashApp' :: AppContext -> Application
-slashApp' = slashSimple . (. flip (runCmd cmd)) . (>>=) . getEnv
+slashApp' = slashSimple . (. flip (runCmd cmd)) . withEnv
 
 authApp :: AppContext -> Application
 authApp (_, config, _) _ send =
