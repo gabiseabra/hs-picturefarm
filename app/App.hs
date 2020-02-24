@@ -5,7 +5,13 @@ import           Web.Middleware.Router
 import qualified Web.Server                    as Web
 import qualified Slack.Server                  as Slack
 
-import           Network.Wai                    ( Application )
+import           Network.Wai                    ( Application
+                                                , Middleware
+                                                )
+import           Network.Wai.Middleware.RequestLogger
+                                                ( logStdout
+                                                , logStdoutDev
+                                                )
 import           Network.Wai.Handler.Warp
 
 main :: IO ()
@@ -19,7 +25,11 @@ application :: AppContext -> IO Application
 application ctx = do
   webApp   <- Web.application ctx
   slackApp <- Slack.application ctx
-  return $ router [match "/slack" slackApp] webApp
+  return $ middleware ctx $ router [match "/slack" slackApp] webApp
+
+middleware :: AppContext -> Middleware
+middleware (Just Production, _, _) = logStdout
+middleware _                       = logStdoutDev
 
 onException _req e = print ("Error: " ++ show e)
 
