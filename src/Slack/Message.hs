@@ -4,6 +4,7 @@
 module Slack.Message
   ( MessageBlock(..)
   , SlackMessage(..)
+  , ResponseType(..)
   , send
   )
 where
@@ -11,7 +12,8 @@ where
 import           GHC.Generics
 
 import           Data.Aeson
--- import           Data.String.Conversions
+
+import           Data.String.Conversions
 import qualified Data.Text                     as T
 import           Text.URI                       ( URI
                                                 , mkURI
@@ -48,8 +50,15 @@ instance ToJSON MessageBlock where
       ["type" .= ("plain_text" :: T.Text), "text" .= title, "emoji" .= True]
     ]
 
+data ResponseType = Ephemeral | InChannel deriving (Show)
+
+instance ToJSON ResponseType where
+  toJSON Ephemeral = String "ephemeral"
+  toJSON InChannel = String "in_channel"
+
 data SlackMessage = SlackMessage
-  { text :: T.Text
+  { response_type :: ResponseType
+  , text :: T.Text
   , blocks :: Maybe [MessageBlock]
   } deriving (Generic, ToJSON)
 
