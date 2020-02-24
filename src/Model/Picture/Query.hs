@@ -46,11 +46,12 @@ fromPictures = [qq|
 -- Filters
 ----------------------------------------------------------------------
 
+-- | Common table expression for a list of aliases corresponding to any of the
+--   queried tags
 tagsCTE = Clause
   CTE
   [qq|
   recursive tags_matched (tag) as (
-      /* -- Select a list of aliases corresponding to all queried tags */
       select v.value
       from tag_aliases ta
       cross join lateral (
@@ -69,13 +70,11 @@ tagsFilter = Clause
   [qq|
   inner join picture_tags ptf
     on ptf.picture_uuid = p.uuid
-    and (
-         ptf.tag = any (?tags)
-      or ptf.tag in ( select tag from tags_matched )
-    )
+    and (ptf.tag = any (?tags)
+      or ptf.tag in ( select tag from tags_matched ))
   |]
 
-resourceTypeFilter = Clause WHERE [qq| resource_type = ?resourceType|]
+resourceTypeFilter = Clause WHERE [qq|resource_type = ?resourceType|]
 
 -- Queries
 ----------------------------------------------------------------------

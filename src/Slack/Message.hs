@@ -15,9 +15,7 @@ import           Data.Aeson
 
 import           Data.String.Conversions
 import qualified Data.Text                     as T
-import           Text.URI                       ( URI
-                                                , mkURI
-                                                )
+import           Text.URI                       ( mkURI )
 
 import           Control.Exception              ( Exception
                                                 , throw
@@ -50,7 +48,10 @@ instance ToJSON MessageBlock where
       ["type" .= ("plain_text" :: T.Text), "text" .= title, "emoji" .= True]
     ]
 
-data ResponseType = Ephemeral | InChannel deriving (Show)
+data ResponseType =
+    Ephemeral -- Only visible to the user who interacted with the slackbot
+  | InChannel -- Visible to all in a channel
+  deriving (Show)
 
 instance ToJSON ResponseType where
   toJSON Ephemeral = String "ephemeral"
@@ -62,6 +63,10 @@ data SlackMessage = SlackMessage
   , blocks :: Maybe [MessageBlock]
   } deriving (Generic, ToJSON)
 
+--------------------------------------------------------------------------------
+
+-- | Send a message to a slack webhook's response_url
+--------------------------------------------------------------------------------
 send :: SlackMessage -> T.Text -> IO ()
 send msg url = do
   _ <- runReq defaultHttpConfig . slackReq msg =<< parseUrl url

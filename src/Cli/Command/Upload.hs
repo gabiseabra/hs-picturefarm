@@ -47,10 +47,10 @@ processFile env file = do
   case pic of
     Nothing -> do
       Picture { uuid, fileName } <- insertPicture env file
-      putStrLn $ "[" ++ (show uuid) ++ "] Inserted " ++ (cs fileName)
+      putStrLn $ "[" ++ show uuid ++ "] Inserted " ++ cs fileName
     Just pic@Picture { uuid, fileName } -> do
       updatePicture env file pic
-      putStrLn $ "[" ++ (show uuid) ++ "] Updated " ++ (cs fileName)
+      putStrLn $ "[" ++ show uuid ++ "] Updated " ++ cs fileName
 
 -- | Upload and insert a new picture to the database
 --------------------------------------------------------------------------------

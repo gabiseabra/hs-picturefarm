@@ -73,7 +73,7 @@ pickByType t = map extractQuery . filter (isFilterType t)
 prefix _ "" = ""
 prefix p q  = p ++ " " ++ q
 
-between str = List.concat . List.intersperse (" " ++ str ++ " ")
+between str = List.intercalate (" " ++ str ++ " ")
 
 ----------------------------------------------------------------------
 

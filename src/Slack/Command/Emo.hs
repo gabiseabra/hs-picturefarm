@@ -30,6 +30,8 @@ import           Control.Exception              ( SomeException
 
 import           Network.Linklater              ( Command(..) )
 
+-- | Parser of the `/emo` command
+--------------------------------------------------------------------------------
 cmd :: CommandParser
 cmd Env { config, conn } (Command "emo" user chan message _ _) = do
   pic <- findOnePicture conn message
@@ -49,6 +51,8 @@ cmd Env { config, conn } (Command "emo" user chan message _ _) = do
           ]
       }
 cmd _ _ = return Nothing
+
+--------------------------------------------------------------------------------
 
 findOnePicture :: Connection -> Maybe T.Text -> IO (Maybe Picture)
 findOnePicture conn message =
