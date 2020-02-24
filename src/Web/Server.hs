@@ -15,7 +15,11 @@ import           Control.Monad.Reader           ( lift
 
 import           Data.Text.Lazy                 ( Text )
 
-import           Network.Wai                    ( Application )
+import           Network.Wai                    ( Application
+                                                , Middleware
+                                                )
+import           Network.Wai.Middleware.AddHeaders
+import           Network.HTTP.Types.Method
 import           Network.HTTP.Types
 import           Web.Scotty.Trans
 
@@ -23,10 +27,19 @@ import           Web.Scotty.Trans
 ----------------------------------------------------------------------
 
 application :: AppContext -> IO Application
-application ctx@(_, config, _) = scottyAppT (runEnvIO ctx) router
+application ctx@(_, config, _) = (scottyAppT (runEnvIO ctx) router)
 
 router :: ScottyT Text EnvM ()
 router = do
+  middleware $ addHeaders
+    [ ("Access-Control-Allow-Origin"  , "*")
+    , ("Access-Control-Allow-Headers" , "*")
+    , ("Access-Control-Request-Method", "GET, POST, OPTIONS")
+    , ("Vary"                         , "Origin")
+    ]
+
+  options "/api" $ status status200
+
   get "/api" $ do
     env <- lift $ asks env
     case env of
