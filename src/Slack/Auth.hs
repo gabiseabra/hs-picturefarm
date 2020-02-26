@@ -38,7 +38,8 @@ import           Network.HTTP.Req               ( Req
                                                 , runReq
                                                 , useHttpsURI
                                                 , defaultHttpConfig
-                                                , ignoreResponse
+                                                , bsResponse
+                                                , responseBody
                                                 )
 -- Routes
 --------------------------------------------------------------------------------
@@ -64,8 +65,6 @@ router config = do
 
 --------------------------------------------------------------------------------
 
-redirectUri host = host <> "/slack/auth/grant"
-
 -- | Get redirect uri for slack to request permission to access a workspace.
 authURI :: Config -> String
 authURI Config {..} =
@@ -73,8 +72,6 @@ authURI Config {..} =
     <> slackClientId
     <> "&scope="
     <> slackScopes
-    <> "&redirect_uri="
-    <> redirectUri host
 
 -- | Send request to https://slack.com/api/oauth.access after permission is
 --   granted on a workspace. It just discards the access token because it isn't
@@ -87,8 +84,7 @@ authorize Config {..} code =
       params' =
           ("client_id" =: slackClientId)
             <> ("client_secret" =: slackClientSecret)
-            <> ("redirect_uri" =: redirectUri host)
             <> ("code" =: code)
-      req' = req POST url' (ReqBodyUrlEnc params') ignoreResponse headers'
-  in  void $ runReq defaultHttpConfig req'
+      req' = req POST url' (ReqBodyUrlEnc params') bsResponse headers'
+  in  runReq defaultHttpConfig req' >>= putStrLn . cs . responseBody
 
