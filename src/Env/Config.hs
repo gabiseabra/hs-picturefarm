@@ -41,6 +41,7 @@ data Environment = Production | Development | Test deriving (Show)
 
 data Config = Config
   { port               :: Int
+  , host               :: String
   , databaseUrl        :: String
   , cdnCloudName       :: String
   , cdnUploadPreset    :: String
@@ -48,6 +49,7 @@ data Config = Config
   , cdnApiSecret       :: String
   , slackSigningSecret :: String
   , slackClientId      :: String
+  , slackClientSecret  :: String
   , slackScopes        :: String
   } deriving (Generic, Show)
 
@@ -56,6 +58,7 @@ instance FromEnv Config
 instance Default Config where
   def = Config
     { port               = 4000
+    , host               = "https://localhost"
     , databaseUrl        =
       "postgres://postgres:postgres@localhost:5432/picturefarm_dev?"
         <> "sslmode=disable"
@@ -65,6 +68,7 @@ instance Default Config where
     , cdnApiSecret       = ""
     , slackSigningSecret = ""
     , slackClientId      = ""
+    , slackClientSecret  = ""
     , slackScopes        = ""
     }
 
