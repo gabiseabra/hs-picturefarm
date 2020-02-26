@@ -73,12 +73,12 @@ authURI Config {..} =
     <> "&scope="
     <> slackScopes
 
--- | Send request to https://slack.com/api/oauth.access after permission is
+-- | Send request to https://slack.com/api/oauth.v2.access after permission is
 --   granted on a workspace. It just discards the access token because it isn't
 --   really needed for slash commands.
 authorize :: Config -> Text -> IO ()
 authorize Config {..} code =
-  let url'     = https "slack.com" /: "api" /: "oauth.access"
+  let url'     = https "slack.com" /: "api" /: "oauth.v2.access"
       headers' = header "Content-Type"
                         "application/x-www-form-urlencoded; charset=UTF-8"
       params' =
