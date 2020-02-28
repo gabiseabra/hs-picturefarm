@@ -59,9 +59,9 @@ tagsCTE = Clause
       ) v (col, value)
       where array[ta.tag,ta.alias]::text[]  && ?tags
     union all
-      select ta.alias
+      select distinct(ta.tag)
       from tag_aliases ta, tags_matched tm
-      where ta.tag = tm.tag
+      where ta.alias = tm.tag
   )
 |]
 
